@@ -240,34 +240,95 @@ tbody tr:last-child td{border-bottom:0}
   .half{grid-template-columns:1fr}
 }
 @media(max-width:820px){
-  .login-page{grid-template-columns:1fr}
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  .login-page{grid-template-columns:1fr;width:100%}
   .login-art{display:none}
+  .login-side{min-height:100dvh;padding:24px 18px calc(24px + env(safe-area-inset-bottom,0px))}
+  .login-card{width:100%;max-width:430px}
   .login-card .m-logo{display:block}
-  .app{grid-template-columns:1fr}
-  .sidebar{position:fixed;top:0;bottom:0;right:0;width:272px;transform:translateX(105%);transition:transform .22s;height:100dvh}
+
+  .app{display:block;width:100%;max-width:100%;min-height:100dvh}
+  .main{display:block;width:100%;max-width:100%;min-width:0}
+  .sidebar{position:fixed;top:0;bottom:0;right:0;width:min(82vw,300px);transform:translateX(105%);transition:transform .22s;height:100dvh;padding-top:max(18px,env(safe-area-inset-top,0px))}
   .sidebar.open{transform:none;box-shadow:0 0 60px rgba(0,0,0,.35)}
   .mobile-menu{display:inline-flex}
-  .topbar{padding:0 14px;height:62px}
-  .topbar-right h2{font-size:17px}
-  .topbar-right .sub{display:none}
-  .content{padding:18px 14px calc(88px + env(safe-area-inset-bottom,0px))}
+
+  .topbar{box-sizing:border-box;width:100%;height:auto;min-height:62px;padding:max(8px,env(safe-area-inset-top,0px)) 12px 8px;gap:8px;align-items:center}
+  .topbar-right{flex:0 0 auto;min-width:34px}
+  .topbar-right>div{display:none}
+  .top-actions{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(112px,1.2fr) 34px 34px;gap:6px;align-items:center}
+  .top-actions>*{min-width:0}
+  .live{width:100%;height:34px;min-width:0;padding:0 9px;font-size:11.5px;justify-content:center;overflow:hidden}
+  .live span{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .store-select,.top-actions .store-select{width:100%!important;min-width:0!important;max-width:none!important;height:34px;padding-inline:8px;font-size:12.5px}
+  .top-actions .btn{width:34px;height:34px;padding:0}
+
+  .content{box-sizing:border-box;width:100%;max-width:none;margin:0;padding:18px 14px calc(108px + env(safe-area-inset-bottom,0px))}
+  .page,.pagehead,.panel,.ov-top,.hero,.ledger,.split,.half,.strip,.sys-grid,.toolbar,.report-controls,.table-wrap{max-width:100%;min-width:0}
+  .pagehead{align-items:flex-start;margin-bottom:14px}
+  .pagehead h3{font-size:21px}
+  .pagehead p{font-size:12.5px;line-height:1.75;max-width:none}
+  .panel{padding:15px;border-radius:14px}
+  .toolbar{align-items:stretch}
+  .toolbar .actions{min-width:0}
   .form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}
+  input,select,textarea,.btn{min-width:0}
   .hero{padding:22px 20px;border-radius:18px}
-  .hero-value{font-size:40px}
+  .hero-value{font-size:clamp(34px,10vw,46px);overflow-wrap:anywhere}
+  .hero-meta{gap:12px 20px}
   .ledger{border-radius:18px}
-  .bnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;inset:auto 0 0 0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
-  .bnav button{display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:transparent;color:var(--ink3);font-size:11.5px;font-weight:600;padding:6px 0;border-radius:10px}
-  .bnav button.active{color:var(--brand)}
-  .toast{inset-inline:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));max-width:none}
+  .table-wrap{width:100%;-webkit-overflow-scrolling:touch}
+  table{max-width:none}
+
+  .bnav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));position:fixed;inset:auto 0 0 0;z-index:30;background:color-mix(in srgb,var(--surface) 96%,transparent);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:6px 6px max(6px,env(safe-area-inset-bottom,0px));box-shadow:0 -8px 24px rgba(0,0,0,.06)}
+  .bnav button{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:transparent;color:var(--ink3);font-size:11px;font-weight:600;padding:5px 2px;border-radius:10px;white-space:nowrap}
+  .bnav button .i{width:19px;height:19px}
+  .bnav button.active{color:var(--brand);background:var(--brand-soft)}
+  .toast{inset-inline:14px;bottom:calc(92px + env(safe-area-inset-bottom,0px));max-width:none}
 }
 @media(max-width:560px){
-  .top-actions .store-select{min-width:112px;max-width:132px}
-  .live{padding:0 10px;font-size:11.5px}
-  .live span{max-width:92px;overflow:hidden;text-overflow:ellipsis}
+  .content{padding-inline:12px}
+  .topbar{padding-inline:10px}
+  .top-actions{grid-template-columns:minmax(82px,.9fr) minmax(108px,1.2fr) 34px 34px;gap:5px}
+  .live{padding-inline:7px;font-size:10.8px}
+  .store-select,.top-actions .store-select{font-size:11.8px}
+
+  .pagehead{display:grid;grid-template-columns:1fr;gap:10px}
+  .pagehead>.btn{width:100%;justify-self:stretch}
+  .pagehead h3{font-size:20px}
+
+  .quick-ranges{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:14px}
+  .quick-ranges .chip{width:100%;padding-inline:6px;white-space:nowrap;font-size:12.5px}
+  .report-controls{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .report-controls>div,.report-controls>.btn{min-width:0;width:100%}
+  .report-controls input{font-size:13px;padding-inline:8px}
+  .report-note{font-size:12.5px;line-height:1.7;padding:10px 12px}
+
+  .strip,.sys-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .strip>div{padding:14px 12px;min-width:0}
+  .strip .tl{font-size:12px;line-height:1.5}
+  .strip .tv{font-size:18px;white-space:normal;overflow-wrap:anywhere}
   .mixlegend{grid-template-columns:1fr}
-  .strip .tv{font-size:20px}
   .search{max-width:none;width:100%}
+  .toolbar>.search,.toolbar>.actions{width:100%}
+  .toolbar>.actions{display:grid;grid-template-columns:1fr;gap:8px}
+  .toolbar>.actions .search,.toolbar>.actions select{width:100%!important;max-width:none!important}
+  .lrow{padding:13px 0}
+  .lrow b{font-size:18px}
+  .lpair>div{padding:12px 14px}
   #paymentMethodsEditor .info-card{grid-template-columns:1fr!important}
+}
+@media(max-width:390px){
+  .content{padding-inline:10px}
+  .top-actions{grid-template-columns:minmax(72px,.8fr) minmax(96px,1.1fr) 32px 32px;gap:4px}
+  .top-actions .btn{width:32px;height:32px}
+  .store-select,.top-actions .store-select{font-size:11px;padding-inline:5px}
+  .live{font-size:10px;padding-inline:5px}
+  .panel{padding:13px}
+  .quick-ranges{gap:5px}
+  .quick-ranges .chip{font-size:12px}
+  .report-controls{gap:8px}
+  .bnav button{font-size:10.5px}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
