@@ -1,305 +1,529 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#07111f" />
-  <title>Geek POS</title>
-  <link rel="icon" href="https://cdn.phototourl.com/member/2026-10-04-49861ce2-7f13-4816-bff0-c7843a413208.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-  <style>
-    :root{
-      --bg:#07111f;--bg2:#0b1527;--panel:#0f1c31;--panel2:#14233b;--panel3:#182a46;
-      --line:#243956;--line2:#315071;--text:#edf6ff;--muted:#91a6bf;--faint:#67809c;
-      --cyan:#26d7ff;--blue:#2a74ff;--violet:#915cff;--green:#35d892;--yellow:#ffc95d;--red:#ff6d87;
-      --shadow:0 22px 60px rgba(0,0,0,.32);--radius:18px;--radius-sm:12px;
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;min-height:100vh;background:
-      radial-gradient(circle at 85% -10%,rgba(38,215,255,.13),transparent 28%),
-      radial-gradient(circle at 8% 8%,rgba(145,92,255,.10),transparent 30%),
-      linear-gradient(145deg,#06101c 0%,#081321 45%,#0b1322 100%);
-      color:var(--text);font-family:'Tajawal','Segoe UI',Tahoma,Arial,sans-serif;overflow-x:hidden}
-    button,input,select,textarea{font:inherit}
-    button{cursor:pointer}
-    .hidden{display:none!important}
-    .shell{min-height:100vh}
-    .glass{background:linear-gradient(145deg,rgba(15,28,49,.93),rgba(10,20,35,.93));border:1px solid var(--line);box-shadow:var(--shadow);backdrop-filter:blur(16px)}
-    .login-page{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(420px,.85fr)}
-    .login-art{position:relative;overflow:hidden;padding:56px;display:flex;flex-direction:column;justify-content:space-between}
-    .login-art:before{content:'';position:absolute;inset:-25%;background:radial-gradient(circle at 55% 35%,rgba(38,215,255,.18),transparent 28%),radial-gradient(circle at 30% 70%,rgba(145,92,255,.14),transparent 25%);filter:blur(10px);pointer-events:none}
-    .hero-logo{position:relative;display:flex;gap:16px;align-items:center}
-    .hero-logo img{width:72px;height:72px;border-radius:22px;box-shadow:0 0 36px rgba(38,215,255,.28)}
-    .hero-logo h1{margin:0;font-size:34px;letter-spacing:.2px}
-    .hero-logo .sub{color:#b6c7db;margin-top:4px}
-    .hero-copy{position:relative;max-width:660px;padding-bottom:6vh}
-    .hero-copy h2{font-size:46px;line-height:1.15;margin:0 0 18px;font-weight:800}
-    .hero-copy p{font-size:18px;color:#b5c7db;line-height:1.9;margin:0}
-    .hero-pills{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
-    .pill{border:1px solid #2c4969;background:#0c1b2fba;padding:8px 12px;border-radius:999px;color:#bcd2e9;font-size:13px}
-    .login-side{display:flex;align-items:center;justify-content:center;padding:28px;background:rgba(4,10,18,.28);border-right:1px solid rgba(49,80,113,.35)}
-    .login-card{width:min(460px,100%);border-radius:26px;padding:26px}
-    .login-card h3{font-size:26px;margin:0 0 6px}
-    .muted{color:var(--muted)}
-    .tiny{font-size:12px;color:var(--faint)}
-    .field{margin-top:15px}
-    .label{display:block;margin-bottom:7px;color:#cfe0f1;font-size:13px;font-weight:600}
-    input,select,textarea{width:100%;border:1px solid #29415f;background:#091423;color:var(--text);border-radius:12px;padding:12px 13px;outline:none;transition:.18s}
-    input:focus,select:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(38,215,255,.11)}
-    textarea{resize:vertical;min-height:110px}
-    .btn{border:1px solid #315071;color:var(--text);background:#152641;border-radius:12px;padding:11px 15px;font-weight:700;transition:.18s}
-    .btn:hover{transform:translateY(-1px);border-color:#49729b;background:#1a2f4d}
-    .btn.primary{border:0;background:linear-gradient(135deg,var(--cyan),var(--blue) 58%,var(--violet));color:#03111f;box-shadow:0 10px 28px rgba(42,116,255,.24)}
-    .btn.green{border-color:#246548;background:#123626;color:#aaf2cd}
-    .btn.red{border-color:#6d3141;background:#311821;color:#ffb3c2}
-    .btn.ghost{background:transparent}
-    .btn.sm{padding:8px 11px;border-radius:10px;font-size:13px}
-    .btn.full{width:100%}
-    .login-head{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin-bottom:20px;text-align:center}
-    .login-head img{display:block}
-    .login-head h3{margin:0;font-size:27px}
-    .login-actions{display:flex;justify-content:center;align-items:center;margin-top:20px}
-    .login-actions .btn{width:min(260px,100%);min-height:46px;font-size:15px}
-    .msg{min-height:22px;margin-top:10px;color:#ffb3c2;font-size:13px;text-align:center}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#EEF1EF" />
+<title>Geek POS</title>
+<link rel="icon" href="https://cdn.phototourl.com/member/2026-10-04-49861ce2-7f13-4816-bff0-c7843a413208.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>(function(){var t=null;try{t=localStorage.getItem('geekpos-theme')}catch(e){}if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)})()</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<style>
+:root{
+  --bg:#EEF1EF;--surface:#FFFFFF;--surface2:#F5F7F6;
+  --ink:#12201D;--ink2:#46574F;--ink3:#74857F;
+  --line:#DCE3E0;--line2:#C6D1CC;
+  --brand:#0A6B5C;--brand-ink:#FFFFFF;--brand-soft:#DCEFE9;
+  --hero:#0B3B33;--hero-ink:#EAF6F2;--hero-ink2:rgba(234,246,242,.68);--hero-line:rgba(234,246,242,.16);
+  --ok:#1B7F52;--ok-soft:#DFF2E7;--warn:#9A5F06;--warn-soft:#FAEDCF;--bad:#B23B26;--bad-soft:#FADFD8;
+  --p-cash:#12A383;--p-card:#3B7DDD;--p-insta:#8F5BD6;--p-wallet:#E0A21A;
+  --radius:16px;
+}
+[data-theme="dark"]{
+  --bg:#0B1311;--surface:#121C19;--surface2:#17231F;
+  --ink:#E8F1EE;--ink2:#A9BBB5;--ink3:#76887F;
+  --line:#223530;--line2:#30453F;
+  --brand:#3FD6AE;--brand-ink:#04211A;--brand-soft:#133329;
+  --hero:#0F2E28;--hero-ink:#EAF6F2;--hero-ink2:rgba(234,246,242,.64);--hero-line:rgba(234,246,242,.14);
+  --ok:#4ADE9B;--ok-soft:#12362A;--warn:#F0B24A;--warn-soft:#38290E;--bad:#FF8A73;--bad-soft:#3A1D17;
+  --p-cash:#2DD4A7;--p-card:#6FA3EE;--p-insta:#B592F0;--p-wallet:#EDB84A;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100dvh;background:var(--bg);color:var(--ink);font-family:'Tajawal','Segoe UI',Tahoma,Arial,sans-serif;font-size:14px;line-height:1.6;overflow-x:hidden;font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.muted{color:var(--ink3);font-size:12.5px}
+.tiny{font-size:12px;color:var(--ink3)}
+.cyan{color:var(--brand)}.green-t{color:var(--ok)}.yellow{color:var(--warn)}.red-t{color:var(--bad)}
 
-    .app{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:100vh}
-    .sidebar{position:sticky;top:0;height:100vh;border-left:1px solid var(--line);padding:18px 14px;background:linear-gradient(180deg,#091423f5,#08111ff7);display:flex;flex-direction:column;z-index:20}
-    .side-brand{display:flex;align-items:center;gap:11px;padding:6px 8px 18px;border-bottom:1px solid #1d3049}
-    .side-brand img{width:46px;height:46px;border-radius:14px}
-    .side-brand b{font-size:18px}
-    .nav{display:flex;flex-direction:column;gap:7px;padding:16px 0;overflow:auto}
-    .nav button{width:100%;text-align:right;border:1px solid transparent;background:transparent;color:#a7bdd4;padding:11px 12px;border-radius:12px;font-weight:700;display:flex;align-items:center;gap:10px}
-    .nav button:hover{background:#101f35;color:#e7f5ff}
-    .nav button.active{color:white;background:linear-gradient(135deg,#153250,#193259);border-color:#2e5072;box-shadow:inset 3px 0 0 var(--cyan)}
-    .nav .ico{width:22px;text-align:center;font-size:16px}
-    .side-foot{margin-top:auto;padding-top:14px;border-top:1px solid #1d3049}
-    .userbox{padding:10px 11px;border-radius:12px;background:#0c192b;border:1px solid #1d3551;margin-bottom:9px}
-    .userbox strong{display:block;font-size:13px}
-    .userbox span{font-size:11px;color:var(--muted);direction:ltr;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ---------- controls ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);border-radius:10px;font-weight:600;transition:background .15s,border-color .15s}
+.btn:hover{background:var(--surface2);border-color:var(--ink3)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn.primary:hover{filter:brightness(1.08);background:var(--brand)}
+.btn.green{background:var(--ok-soft);border-color:transparent;color:var(--ok)}
+.btn.red{color:var(--bad)}
+.btn.ghost{background:transparent}
+.btn.sm{height:34px;padding:0 12px;font-size:13px;border-radius:9px}
+.btn.full{width:100%}
+.btn.icon{width:40px;padding:0}
+.btn.icon.sm{width:34px}
+.danger-action{color:var(--bad)!important;background:var(--bad-soft)!important;border-color:transparent!important}
+input,select,textarea{width:100%;height:42px;border:1px solid var(--line2);background:var(--surface);border-radius:10px;padding:0 12px;outline:none;transition:border-color .15s,box-shadow .15s}
+textarea{height:auto;min-height:96px;padding:10px 12px}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent)}
+::placeholder{color:var(--ink3)}
+.label{display:block;margin-bottom:6px;color:var(--ink2);font-size:13px;font-weight:600}
+.field{margin-top:16px}
+.search{max-width:300px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:var(--surface2);color:var(--ink2);border:1px solid var(--line)}
+.badge.ok{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.badge.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.badge.danger{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.chip{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line2);background:var(--surface);color:var(--ink2);font-weight:600;font-size:13px}
+.chip:hover{border-color:var(--ink3)}
+.chip.active{background:var(--ink);border-color:var(--ink);color:var(--surface)}
 
-    .main{min-width:0}
-    .topbar{height:76px;position:sticky;top:0;z-index:15;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(7,17,31,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-    .topbar-right h2{margin:0;font-size:22px}
-    .topbar-right div{font-size:12px;color:var(--muted);margin-top:3px}
-    .top-actions{display:flex;gap:9px;align-items:center}
-    .store-select{min-width:165px;width:auto;padding:9px 12px}
-    .live{display:flex;align-items:center;gap:7px;color:#a8f0cb;font-size:12px;border:1px solid #245f45;background:#0e2b20;padding:8px 10px;border-radius:999px}
-    .live i{width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 12px var(--green)}
-    .content{padding:24px;max-width:1540px;margin:auto}
-    .section-title{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:14px}
-    .section-title h3{margin:0;font-size:24px}
-    .section-title p{margin:4px 0 0;color:var(--muted);font-size:13px}
-    .grid{display:grid;gap:14px}
-    .kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-    .card{border-radius:var(--radius);background:linear-gradient(145deg,#0f1d31,#0c182a);border:1px solid var(--line);box-shadow:0 14px 40px rgba(0,0,0,.18)}
-    .pad{padding:18px}
-    .kpi{padding:18px;position:relative;overflow:hidden;min-height:126px}
-    .kpi:after{content:'';position:absolute;left:-25px;top:-35px;width:120px;height:120px;border-radius:50%;background:rgba(38,215,255,.07)}
-    .kpi .label{margin:0;color:#90a8c2;font-size:13px}
-    .kpi .value{font-size:30px;font-weight:800;margin-top:9px;letter-spacing:.2px}
-    .kpi .hint{margin-top:4px;color:#68819d;font-size:11px}
-    .cyan{color:var(--cyan)}.green-t{color:var(--green)}.yellow{color:var(--yellow)}.red-t{color:var(--red)}
-    .split{grid-template-columns:1.2fr .8fr}
-    .half{grid-template-columns:1fr 1fr}
-    .overview-bottom>.card{min-width:0;height:100%;display:flex;flex-direction:column}
-    .overview-bottom .table-wrap{flex:1;min-width:0}
-    .overview-bottom table{min-width:100%;width:100%}
-    .system-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
-    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
-    .mini{padding:12px;border:1px solid #223955;background:#0b1728;border-radius:13px}
-    .mini span{display:block;color:#7f98b3;font-size:11px}
-    .mini b{display:block;font-size:17px;margin-top:5px}
-    .bar-list{display:flex;flex-direction:column;gap:13px;margin-top:8px}
-    .bar-head{display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-bottom:5px}
-    .bar-track{height:9px;background:#091422;border-radius:999px;overflow:hidden;border:1px solid #1c314c}
-    .bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cyan),var(--blue),var(--violet));min-width:2px}
-    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-    .toolbar .actions{display:flex;gap:8px;flex-wrap:wrap}
-    .search{max-width:320px}
-    .table-wrap{overflow:auto;border:1px solid #1e3450;border-radius:14px}
-    table{width:100%;border-collapse:collapse;min-width:720px}
-    th,td{padding:12px 11px;border-bottom:1px solid #1c3049;text-align:right;white-space:nowrap;font-size:13px}
-    th{color:#9eb4ca;background:#0c192b;font-weight:700;position:sticky;top:0}
-    tbody tr:hover{background:#10213a}
-    tbody tr:last-child td{border-bottom:0}
-    .badge{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;font-size:11px;border:1px solid #315071;background:#11233c;color:#bdd5ec}
-    .badge.ok{border-color:#286747;background:#103122;color:#9df0c6}
-    .badge.warn{border-color:#6b5726;background:#2f2812;color:#ffe29a}
-    .badge.danger{border-color:#703344;background:#331822;color:#ffb8c5}
-    .empty{text-align:center;padding:28px;color:#69839f}
-    .page{display:none}
-    .page.active{display:block}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-    .form-grid .wide{grid-column:1/-1}
-    .update-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-    .chip{border:1px solid #294561;background:#0c192b;color:#9fb5cb;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:700;font-size:13px}
-    .chip.active{color:#051321;background:linear-gradient(135deg,var(--cyan),#69e5ff);border-color:transparent}
-    .info-card{padding:14px;border-radius:14px;border:1px solid #21405c;background:#0a1a2d;color:#a9c0d7;line-height:1.7;font-size:13px}
-    .code{direction:ltr;text-align:left;font-family:Consolas,monospace;background:#07111e;border:1px solid #1e344e;border-radius:10px;padding:10px;overflow:auto;color:#a9ddff}
-    .toast{position:fixed;left:24px;bottom:24px;z-index:100;background:#0f2138;border:1px solid #315071;color:#eaf6ff;padding:12px 15px;border-radius:13px;box-shadow:var(--shadow);transform:translateY(30px);opacity:0;pointer-events:none;transition:.22s;max-width:420px}
-    .toast.show{transform:translateY(0);opacity:1}
-    .toast.success{border-color:#276848}.toast.error{border-color:#7a3548}
-    .mobile-menu{display:none}
-    .report-controls{display:grid;grid-template-columns:repeat(2,minmax(160px,1fr)) auto auto;gap:10px;align-items:end}
-    .quick-ranges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-    .report-note{padding:10px 12px;border:1px solid #21405c;background:#0a1a2d;border-radius:12px;color:#9eb8d1;font-size:12px;line-height:1.7}
-    .danger-action{border-color:#7a3548!important;background:#351923!important;color:#ffc0cc!important}
-    @media(max-width:900px){.report-controls{grid-template-columns:1fr 1fr}.report-controls .btn{width:100%}}
-    .skeleton{background:linear-gradient(90deg,#10213a,#172b47,#10213a);background-size:200% 100%;animation:shimmer 1.3s infinite;border-radius:7px;color:transparent!important}
-    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-    @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.stats-row{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:820px){.system-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.login-page{grid-template-columns:1fr}.login-art{display:none}.login-side{min-height:100vh;border:0}.app{grid-template-columns:1fr}.sidebar{position:fixed;right:0;top:0;width:265px;transform:translateX(110%);transition:.22s;box-shadow:var(--shadow)}.sidebar.open{transform:translateX(0)}.mobile-menu{display:inline-flex}.topbar{padding:0 13px}.topbar-right h2{font-size:18px}.live{display:none}.content{padding:14px}.half,.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}}
-    @media(max-width:560px){.kpi-grid{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}.top-actions .btn span{display:none}.store-select{min-width:125px;max-width:140px}}
-  </style>
+/* ---------- login ---------- */
+.login-page{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);min-height:100dvh}
+.login-art{position:relative;overflow:hidden;background:var(--hero);color:var(--hero-ink);padding:52px 56px;display:flex;flex-direction:column;justify-content:space-between}
+.login-art svg.deco{position:absolute;inset:auto 0 0 0;width:100%;height:46%;opacity:.5;pointer-events:none}
+.brandrow{position:relative;display:flex;align-items:center;gap:14px}
+.brandrow img{width:52px;height:52px;border-radius:15px}
+.brandrow b{font-size:20px;display:block}
+.brandrow span{font-size:13px;color:var(--hero-ink2)}
+.login-copy{position:relative;max-width:520px;padding-bottom:12vh}
+.login-copy h2{font-size:44px;line-height:1.25;margin:0 0 16px;font-weight:700}
+.login-copy p{margin:0 0 26px;font-size:17px;color:var(--hero-ink2);line-height:1.9}
+.login-copy ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.login-copy li{display:flex;gap:12px;align-items:center;font-size:15px}
+.login-copy li:before{content:'';width:8px;height:8px;border-radius:50%;background:var(--p-cash);flex:none}
+.login-side{display:flex;align-items:center;justify-content:center;padding:28px;background:var(--bg)}
+.login-card{width:min(420px,100%)}
+.login-card h3{font-size:26px;margin:0 0 4px;font-weight:700}
+.login-card .sub{color:var(--ink3);margin-bottom:8px}
+.login-card .m-logo{display:none;width:52px;height:52px;border-radius:15px;margin-bottom:16px}
+.login-actions{margin-top:22px}
+.login-actions .btn{width:100%;height:46px;font-size:15px}
+.msg{min-height:22px;margin-top:12px;color:var(--bad);font-size:13px}
+
+/* ---------- app shell ---------- */
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100dvh}
+.sidebar{position:sticky;top:0;height:100dvh;background:var(--surface);border-inline-end:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;z-index:40}
+.side-brand{display:flex;align-items:center;gap:12px;padding:4px 8px 18px}
+.side-brand img{width:40px;height:40px;border-radius:12px}
+.side-brand b{display:block;font-size:17px;line-height:1.2}
+.nav{display:flex;flex-direction:column;gap:4px;padding:6px 0;overflow:auto;flex:1}
+.nav button{display:flex;align-items:center;gap:12px;width:100%;height:42px;padding:0 12px;border:0;background:transparent;color:var(--ink2);border-radius:10px;font-weight:500;text-align:right}
+.nav button:hover{background:var(--surface2);color:var(--ink)}
+.nav button.active{background:var(--brand-soft);color:var(--brand);font-weight:700}
+.side-foot{padding-top:14px;border-top:1px solid var(--line)}
+.userbox{padding:8px 10px;margin-bottom:10px}
+.userbox strong{display:block;font-size:13.5px}
+.userbox span{display:block;font-size:12px;color:var(--ink3);direction:ltr;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scrim{position:fixed;inset:0;background:rgba(5,12,10,.5);z-index:35;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.show{opacity:1;pointer-events:auto}
+.main{min-width:0}
+.topbar{height:68px;position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 28px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.topbar-right{display:flex;align-items:center;gap:12px;min-width:0}
+.topbar-right h2{margin:0;font-size:20px;font-weight:700;line-height:1.2}
+.topbar-right .sub{font-size:12.5px;color:var(--ink3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mobile-menu{display:none}
+.top-actions{display:flex;gap:8px;align-items:center}
+.store-select{width:auto;min-width:150px;height:36px;font-size:13px;padding:0 10px}
+.live{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--ok);background:var(--ok-soft);white-space:nowrap}
+.live i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.live.stale{color:var(--warn);background:var(--warn-soft)}
+.live:not(.stale) i{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+#refreshBtn.busy .i{animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.content{padding:26px 28px 40px;max-width:1440px;margin:auto}
+.page{display:none}.page.active{display:block}
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.pagehead h3{margin:0;font-size:22px;font-weight:700}
+.pagehead p{margin:3px 0 0;color:var(--ink3);font-size:13px;max-width:70ch}
+.stack>*+*{margin-top:16px}
+
+/* ---------- surfaces ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.ph h4{margin:0;font-size:15.5px;font-weight:700}
+.ph .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:16px}
+.half{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;max-height:620px}
+table{width:100%;border-collapse:collapse;min-width:620px}
+th,td{padding:11px 14px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-size:13.5px}
+th{position:sticky;top:0;background:var(--surface2);color:var(--ink2);font-size:12.5px;font-weight:600;z-index:1}
+tbody tr:hover{background:var(--surface2)}
+tbody tr:last-child td{border-bottom:0}
+.empty{text-align:center;color:var(--ink3);padding:30px 12px}
+.branch-note{display:block;margin-top:2px;color:var(--ink3);font-size:11.5px;font-weight:500}
+
+/* ---------- overview ---------- */
+.ov-top{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+.hero{background:var(--hero);color:var(--hero-ink);border-radius:20px;padding:28px 30px;display:flex;flex-direction:column;justify-content:space-between;gap:26px;border:1px solid var(--hero-line)}
+.hero-label{font-size:14px;color:var(--hero-ink2);font-weight:500}
+.hero-value{font-size:56px;line-height:1.1;font-weight:700;margin-top:6px;letter-spacing:-.5px}
+.cur{font-size:.36em;font-weight:500;margin-inline-start:.45em;color:var(--hero-ink2);letter-spacing:0}
+.hero-meta{display:flex;gap:26px;margin-top:14px;font-size:14px;color:var(--hero-ink2);flex-wrap:wrap}
+.hero-meta b{color:var(--hero-ink);font-weight:700;font-size:16px}
+.mixbar{display:flex;gap:3px;height:12px;border-radius:999px;overflow:hidden}
+.mixbar i{display:block;min-width:4px}
+.mixbar i.none{background:var(--hero-line)}
+.mixlegend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 24px;margin-top:16px}
+.lg{display:flex;align-items:center;gap:9px;font-size:13px;min-width:0}
+.lg .dot{width:9px;height:9px;border-radius:3px;flex:none}
+.lg .ln{color:var(--hero-ink2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lg b{font-weight:600}
+.lg em{font-style:normal;color:var(--hero-ink2);width:38px;text-align:left;font-size:12px}
+.light-legend .lg .ln,.light-legend .lg em{color:var(--ink3)}
+.ledger{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:6px 22px;display:flex;flex-direction:column}
+.lrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 0;border-bottom:1px solid var(--line)}
+.lrow:last-child{border-bottom:0}
+.lrow span{font-weight:600}
+.lrow small{display:block;color:var(--ink3);font-size:12px;font-weight:400}
+.lrow b{font-size:21px;font-weight:700;white-space:nowrap}
+.lrow b .cur{font-size:.58em;color:var(--ink3)}
+.lpair{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);margin:0 -22px}
+.lpair>div{padding:14px 22px}
+.lpair>div+div{border-inline-start:1px solid var(--line)}
+.lpair span{display:block;color:var(--ink3);font-size:12.5px}
+.lpair b{font-size:22px;font-weight:700}
+
+/* ---------- strips ---------- */
+.strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.strip>div{background:var(--surface);padding:16px 20px}
+.strip .tl{display:flex;align-items:center;gap:8px;color:var(--ink3);font-size:13px;font-weight:500}
+.strip .tl .dot{width:9px;height:9px;border-radius:3px}
+.strip .tv{font-size:24px;font-weight:700;margin-top:6px;line-height:1.3;white-space:nowrap}
+.strip .tv .cur{font-size:.55em;color:var(--ink3)}
+
+/* ---------- report chart ---------- */
+.bars{display:flex;align-items:flex-end;gap:10px;height:210px;overflow-x:auto;padding-bottom:2px}
+.bcol{flex:1 0 44px;max-width:90px;height:100%;display:flex;flex-direction:column;align-items:center;gap:6px}
+.btrack{flex:1;width:100%;display:flex;align-items:flex-end;background:var(--surface2);border-radius:8px;overflow:hidden}
+.bfill{width:100%;background:var(--brand);border-radius:8px 8px 0 0}
+.bval{font-size:11.5px;color:var(--ink2);font-weight:600}
+.blabel{font-size:11.5px;color:var(--ink3)}
+.bars.dense .bval{display:none}
+.bars.dense .bcol{flex-basis:26px}
+
+/* ---------- forms & misc ---------- */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.toolbar .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid .wide{grid-column:1/-1}
+.update-tabs,.quick-ranges{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.report-controls{display:grid;grid-template-columns:repeat(2,minmax(150px,1fr)) auto auto;gap:12px;align-items:end}
+.report-note{margin-top:14px;padding:10px 14px;border-radius:10px;background:var(--surface2);color:var(--ink2);font-size:13px}
+.info-card{padding:12px 14px;border-radius:12px;background:var(--surface2);border:1px solid var(--line);color:var(--ink2);font-size:13px}
+.mini{padding:4px 0}
+.mini span{display:block;color:var(--ink3);font-size:12.5px}
+.mini b{display:block;font-size:17px;margin-top:2px}
+.sys-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.sys-grid .mini{background:var(--surface);padding:16px 18px}
+
+/* ---------- dialog & toast ---------- */
+.dlg{border:0;padding:0;border-radius:18px;background:var(--surface);color:var(--ink);width:min(440px,calc(100vw - 28px));box-shadow:0 24px 70px rgba(0,0,0,.35)}
+.dlg::backdrop{background:rgba(5,12,10,.55)}
+.dlg-body{padding:24px}
+.dlg h4{margin:0 0 4px;font-size:18px}
+.dlg .sub{color:var(--ink3);font-size:13px;margin-bottom:6px}
+.dlg-line{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+.dlg-line b{font-weight:700}
+.dlg-actions{display:flex;gap:10px;margin-top:20px}
+.dlg-actions .btn{flex:1;height:44px}
+.toast{position:fixed;inset-inline-start:24px;bottom:24px;z-index:100;background:var(--ink);color:var(--surface);padding:12px 16px;border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.28);transform:translateY(24px);opacity:0;pointer-events:none;transition:transform .2s,opacity .2s;max-width:min(420px,calc(100vw - 32px));font-size:13.5px;font-weight:500}
+.toast.show{transform:none;opacity:1}
+.toast.error{background:var(--bad);color:#fff}
+
+/* ---------- bottom nav ---------- */
+.bnav{display:none}
+
+@media(max-width:1100px){
+  .ov-top,.split{grid-template-columns:1fr}
+  .strip,.sys-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  .report-controls{grid-template-columns:1fr 1fr}.report-controls .btn{width:100%}
+  .half{grid-template-columns:1fr}
+}
+@media(max-width:820px){
+  .login-page{grid-template-columns:1fr}
+  .login-art{display:none}
+  .login-card .m-logo{display:block}
+  .app{grid-template-columns:1fr}
+  .sidebar{position:fixed;top:0;bottom:0;right:0;width:272px;transform:translateX(105%);transition:transform .22s;height:100dvh}
+  .sidebar.open{transform:none;box-shadow:0 0 60px rgba(0,0,0,.35)}
+  .mobile-menu{display:inline-flex}
+  .topbar{padding:0 14px;height:62px}
+  .topbar-right h2{font-size:17px}
+  .topbar-right .sub{display:none}
+  .content{padding:18px 14px calc(88px + env(safe-area-inset-bottom,0px))}
+  .form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}
+  .hero{padding:22px 20px;border-radius:18px}
+  .hero-value{font-size:40px}
+  .ledger{border-radius:18px}
+  .bnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;inset:auto 0 0 0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+  .bnav button{display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:transparent;color:var(--ink3);font-size:11.5px;font-weight:600;padding:6px 0;border-radius:10px}
+  .bnav button.active{color:var(--brand)}
+  .toast{inset-inline:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));max-width:none}
+}
+@media(max-width:560px){
+  .top-actions .store-select{min-width:112px;max-width:132px}
+  .live{padding:0 10px;font-size:11.5px}
+  .live span{max-width:92px;overflow:hidden;text-overflow:ellipsis}
+  .mixlegend{grid-template-columns:1fr}
+  .strip .tv{font-size:20px}
+  .search{max-width:none;width:100%}
+  #paymentMethodsEditor .info-card{grid-template-columns:1fr!important}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
 </head>
 <body oncontextmenu="return false;">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-dash" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M16.5 9.4 7.5 4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+    <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></symbol>
+    <symbol id="i-report" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 18v-2M12 18v-6M16 18v-4"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+    <symbol id="i-pulse" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol>
+  </defs>
+</svg>
+
+<!-- ================= LOGIN ================= -->
 <div id="loginPage" class="login-page">
   <section class="login-art">
-    <div class="hero-logo">
-      <img src="data:image/webp;base64,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" alt="Geek POS">
-      <div><h1>Geek POS Online</h1><div class="sub">لوحة متابعة الإدارة عن بُعد</div></div>
+    <svg class="deco" viewBox="0 0 600 240" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="#2DD4A7" stroke-width="2.5" stroke-linejoin="round" points="0,200 70,176 130,188 200,120 270,142 340,84 410,104 480,48 540,64 600,22"/><polyline fill="none" stroke="#EAF6F2" stroke-opacity=".25" stroke-width="1.5" stroke-linejoin="round" points="0,220 80,204 150,210 220,170 290,184 360,140 430,152 500,112 560,120 600,96"/></svg>
+    <div class="brandrow"><img src="data:image/webp;base64,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" alt=""><div><b>Geek POS Online</b><span>لوحة متابعة الإدارة عن بُعد</span></div></div>
+    <div class="login-copy">
+      <h2>تابع مشروعك من أي مكان.</h2>
+      <p>المبيعات والورديات والمخزون وتحديثات الكاشير في لوحة واحدة.</p>
+      <ul>
+        <li>تحديث تلقائي للمبيعات</li>
+        <li>إغلاق الوردية وإرسال التعديلات لجهاز الكاشير</li>
+        <li> تقارير واضحة تساعدك علي متابعة النشاط</li>
+            <li> متابعة كل الفروع من شاشة واحدة</li>
+      </ul>
     </div>
-    <div class="hero-copy">
-      <h2>كل تفاصيل نشاطك<br>في شاشة واحدة.</h2>
-      <p>تابع المبيعات والورديات والمصروفات والمخزون من أي مكان، وأرسل تحديثات الأقسام والأصناف إلى أجهزة الكاشير عند اتصالها بالإنترنت.</p>
-      <div class="hero-pills"><span class="pill">🔐 تسجيل دخول آمن</span><span class="pill">⚡ تحديث تلقائي</span><span class="pill">📦 مخزون وأصناف</span><span class="pill">🟢 ورديات مباشرة</span></div>
-    </div>
-    <div class="tiny">Geek POS • لوحة الإدارة الإلكترونية</div>
+    <div class="tiny" style="position:relative;color:var(--hero-ink2)">Geek POS • لوحة الإدارة الإلكترونية</div>
   </section>
   <section class="login-side">
-    <div class="login-card glass">
-      <div class="login-head"><img src="data:image/webp;base64,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" style="width:58px;height:58px;border-radius:18px" alt="Geek POS"><div><h3>تسجيل الدخول</h3><div class="muted">أدخل بيانات حسابك للمتابعة</div></div></div>
-      <div class="field"><label class="label">البريد الإلكتروني</label><input id="loginEmail" type="email" autocomplete="username" placeholder="admin@example.com"></div>
-      <div class="field"><label class="label">كلمة المرور</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+    <div class="login-card">
+      <img class="m-logo" src="data:image/webp;base64,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" alt="Geek POS">
+      <h3>تسجيل الدخول</h3>
+      <div class="sub">أدخل بيانات حسابك للمتابعة</div>
+      <div class="field"><label class="label" for="loginEmail">البريد الإلكتروني</label><input id="loginEmail" type="email" autocomplete="username" placeholder="admin@example.com" dir="ltr" style="text-align:right"></div>
+      <div class="field"><label class="label" for="loginPassword">كلمة المرور</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••" dir="ltr" style="text-align:right"></div>
       <div class="login-actions"><button id="loginBtn" class="btn primary">تسجيل الدخول</button></div>
-      <div id="loginMsg" class="msg"></div>
+      <div id="loginMsg" class="msg" role="alert"></div>
     </div>
   </section>
 </div>
 
+<!-- ================= APP ================= -->
 <div id="app" class="app hidden">
   <aside id="sidebar" class="sidebar">
-    <div class="side-brand"><img src="data:image/webp;base64,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" alt="Geek POS"><div><b>Geek POS</b><div class="tiny">Online Dashboard</div></div></div>
+    <div class="side-brand"><img src="data:image/webp;base64,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" alt=""><div><b>Geek POS</b><div class="tiny">لوحة الإدارة</div></div></div>
     <nav class="nav">
-      <button class="active" data-page="overview"><span class="ico">▦</span>نظرة عامة</button>
-      <button data-page="sales"><span class="ico">◔</span>المبيعات</button>
-      <button data-page="shifts"><span class="ico">●</span>الورديات</button>
-      <button data-page="inventory"><span class="ico">◫</span>المخزون والأصناف</button>
-      <button data-page="expenses"><span class="ico">▤</span>المصروفات</button>
-      <button data-page="reports"><span class="ico">▥</span>التقارير</button>
-      <button data-page="updates"><span class="ico">⇄</span>تحديثات الكاشير</button>
-      <button data-page="connection"><span class="ico">◎</span>حالة النظام</button>
+      <button class="active" data-page="overview"><svg class="i"><use href="#i-dash"/></svg>نظرة عامة</button>
+      <button data-page="sales"><svg class="i"><use href="#i-trend"/></svg>المبيعات</button>
+      <button data-page="shifts"><svg class="i"><use href="#i-clock"/></svg>الورديات</button>
+      <button data-page="inventory"><svg class="i"><use href="#i-box"/></svg>المخزون والأصناف</button>
+      <button data-page="expenses"><svg class="i"><use href="#i-receipt"/></svg>المصروفات</button>
+      <button data-page="reports"><svg class="i"><use href="#i-report"/></svg>التقارير</button>
+      <button data-page="updates"><svg class="i"><use href="#i-send"/></svg>تحديثات الكاشير</button>
+      <button data-page="connection"><svg class="i"><use href="#i-pulse"/></svg>حالة النظام</button>
     </nav>
-    <div class="side-foot"><div class="userbox"><strong id="userName">—</strong><span id="userEmail">—</span></div><button id="logoutBtn" class="btn red full">تسجيل الخروج</button></div>
+    <div class="side-foot">
+      <div class="userbox"><strong id="userName">—</strong><span id="userEmail">—</span></div>
+      <button id="logoutBtn" class="btn red full"><svg class="i"><use href="#i-logout"/></svg>تسجيل الخروج</button>
+    </div>
   </aside>
+  <div id="scrim" class="scrim"></div>
 
   <main class="main">
     <header class="topbar">
-      <div class="topbar-right"><button id="menuBtn" class="btn sm mobile-menu">☰</button><h2 id="pageTitle">نظرة عامة</h2><div id="pageSub">متابعة لحظية لبيانات Geek POS</div></div>
-      <div class="top-actions"><div class="live"><i></i><span>متصل</span></div><select id="storeSelect" class="store-select"></select><button id="refreshBtn" class="btn sm primary"><span>تحديث</span> ↻</button></div>
+      <div class="topbar-right">
+        <button id="menuBtn" class="btn icon sm mobile-menu" aria-label="القائمة"><svg class="i"><use href="#i-menu"/></svg></button>
+        <div><h2 id="pageTitle">نظرة عامة</h2><div id="pageSub" class="sub">متابعة لحظية لبيانات Geek POS</div></div>
+      </div>
+      <div class="top-actions">
+        <div class="live"><i></i><span>متصل</span></div>
+        <select id="storeSelect" class="store-select" aria-label="الفرع"></select>
+        <button id="refreshBtn" class="btn sm icon" aria-label="تحديث" title="تحديث"><svg class="i"><use href="#i-refresh"/></svg></button>
+        <button id="themeBtn" class="btn sm icon" aria-label="تبديل المظهر" title="تبديل المظهر"></button>
+      </div>
     </header>
+
     <div class="content">
+
+      <!-- overview -->
       <section id="page-overview" class="page active">
-        <div class="section-title"><div><h3>ملخص النشاط</h3><p id="lastUpdated">بانتظار البيانات...</p></div><div class="actions"><button id="exportProducts" class="btn sm">تصدير الأصناف CSV</button></div></div>
-        <div class="grid kpi-grid">
-          <div class="card kpi"><div class="label">إجمالي المبيعات</div><div id="kSales" class="value cyan">0.00 جنيه</div><div class="hint">مبيعات اليوم</div></div>
-          <div class="card kpi"><div class="label">عدد الفواتير</div><div id="kOrders" class="value">0</div><div class="hint">متوسط الفاتورة <span id="kAvg">0.00</span></div></div>
-          <div class="card kpi"><div class="label">صافي المبيعات</div><div id="kNet" class="value green-t">0.00 جنيه</div><div class="hint">بعد المرتجعات</div></div>
-          <div class="card kpi"><div class="label">إجمالي المصروفات</div><div id="kExpenses" class="value yellow">0.00 جنيه</div><div class="hint">المصروفات المسجلة</div></div>
+        <div class="pagehead"><div><h3>ملخص النشاط</h3><p id="lastUpdated">بانتظار البيانات...</p></div><button id="exportProducts" class="btn sm"><svg class="i"><use href="#i-download"/></svg>تصدير الأصناف CSV</button></div>
+        <div class="ov-top">
+          <div class="hero">
+            <div>
+              <div class="hero-label">إجمالي مبيعات اليوم</div>
+              <div id="kSales" class="hero-value">0.00 جنيه</div>
+              <div class="hero-meta"><span><b id="kOrders">0</b> فاتورة</span><span>متوسط الفاتورة <b id="kAvg">0.00</b></span></div>
+            </div>
+            <div>
+              <div id="mixBar" class="mixbar"></div>
+              <div id="paymentBars" class="mixlegend"></div>
+            </div>
+          </div>
+          <div class="ledger">
+            <div class="lrow"><span>صافي المبيعات<small>بعد المرتجعات</small></span><b id="kNet" class="green-t">0.00 جنيه</b></div>
+            <div class="lrow"><span>إجمالي المصروفات<small>المصروفات المسجلة</small></span><b id="kExpenses" class="yellow">0.00 جنيه</b></div>
+            <div class="lrow"><span>المرتجعات</span><b id="mRefunds" class="red-t">0.00</b></div>
+            <div class="lrow"><span>ربح تقديري</span><b id="mProfit" class="green-t">0.00</b></div>
+            <div class="lpair"><div><span>مخزون منخفض</span><b id="mLow" class="yellow">0</b></div><div><span>وردية مفتوحة</span><b id="mOpen">0</b></div></div>
+          </div>
         </div>
-        <div class="grid split" style="margin-top:14px">
-          <div class="card pad"><div class="toolbar"><div><h3 style="margin:0">طرق الدفع</h3><div class="muted">توزيع مبيعات اليوم</div></div></div><div id="paymentBars" class="bar-list"></div></div>
-          <div class="card pad"><h3 style="margin-top:0">مؤشرات إضافية</h3><div class="stats-row"><div class="mini"><span>المرتجعات</span><b id="mRefunds" class="red-t">0.00</b></div><div class="mini"><span>ربح تقديري</span><b id="mProfit" class="green-t">0.00</b></div><div class="mini"><span>مخزون منخفض</span><b id="mLow" class="yellow">0</b></div><div class="mini"><span>وردية مفتوحة</span><b id="mOpen">0</b></div></div></div>
-        </div>
-        <div class="grid split overview-bottom" style="margin-top:14px">
-          <div class="card pad"><div class="toolbar"><h3 style="margin:0">الأكثر مبيعًا</h3><span class="muted">أعلى 10 أصناف</span></div><div class="table-wrap"><table><thead><tr><th>الصنف</th><th>الكمية</th><th>المبيعات</th></tr></thead><tbody id="topProductsBody"></tbody></table></div></div>
-          <div class="card pad"><div class="toolbar"><h3 style="margin:0">تنبيهات المخزون</h3><span class="muted">الأصناف القريبة من النفاد</span></div><div class="table-wrap"><table><thead><tr><th>الصنف</th><th>الحالي</th><th>الحد</th><th>الحالة</th></tr></thead><tbody id="lowStockBody"></tbody></table></div></div>
+        <div class="split">
+          <div class="panel"><div class="ph"><h4>الأكثر مبيعًا</h4><span class="muted">أعلى 10 أصناف</span></div><div class="table-wrap"><table><thead><tr><th>الصنف</th><th>الكمية</th><th>المبيعات</th></tr></thead><tbody id="topProductsBody"></tbody></table></div></div>
+          <div class="panel"><div class="ph"><h4>تنبيهات المخزون</h4><span class="muted">الأصناف القريبة من النفاد</span></div><div class="table-wrap"><table style="min-width:420px"><thead><tr><th>الصنف</th><th>الحالي</th><th>الحد</th><th>الحالة</th></tr></thead><tbody id="lowStockBody"></tbody></table></div></div>
         </div>
       </section>
 
+      <!-- sales -->
       <section id="page-sales" class="page">
-        <div class="section-title"><div><h3>المبيعات والتحصيل</h3><p>إجماليات كل الورديات المفتوحة حاليًا، حتى لو استمرت الوردية بعد منتصف الليل أو تغيّر التاريخ.</p></div><div id="salesShiftNote" class="badge ok">الورديات المفتوحة</div></div>
-        <div class="grid kpi-grid"><div class="card kpi"><div class="label">كاش</div><div id="sCash" class="value">0.00</div></div><div class="card kpi"><div class="label">فيزا / كارت</div><div id="sCard" class="value">0.00</div></div><div class="card kpi"><div class="label">إنستاباي</div><div id="sInsta" class="value">0.00</div></div><div class="card kpi"><div class="label">محفظة</div><div id="sWallet" class="value">0.00</div></div></div>
-        <div class="card pad" style="margin-top:14px"><div class="toolbar"><h3 style="margin:0">ترتيب الأصناف حسب المبيعات</h3></div><div class="table-wrap"><table><thead><tr><th>#</th><th>المنتج</th><th>الكمية</th><th>المبيعات</th></tr></thead><tbody id="salesProductsBody"></tbody></table></div></div>
+        <div class="pagehead"><div><h3>المبيعات والتحصيل</h3><p>إجماليات كل الورديات المفتوحة حاليًا</p></div><div id="salesShiftNote" class="badge ok">الورديات المفتوحة</div></div>
+        <div class="strip">
+          <div><div class="tl"><span class="dot" style="background:var(--p-cash)"></span>كاش</div><div id="sCash" class="tv">0.00</div></div>
+          <div><div class="tl"><span class="dot" style="background:var(--p-card)"></span>فيزا / كارت</div><div id="sCard" class="tv">0.00</div></div>
+          <div><div class="tl"><span class="dot" style="background:var(--p-insta)"></span>إنستاباي</div><div id="sInsta" class="tv">0.00</div></div>
+          <div><div class="tl"><span class="dot" style="background:var(--p-wallet)"></span>محفظة</div><div id="sWallet" class="tv">0.00</div></div>
+        </div>
+        <div class="panel" style="margin-top:16px"><div class="ph"><h4>ترتيب الأصناف حسب المبيعات</h4></div><div class="table-wrap"><table><thead><tr><th>#</th><th>المنتج</th><th>الكمية</th><th>المبيعات</th></tr></thead><tbody id="salesProductsBody"></tbody></table></div></div>
       </section>
 
+      <!-- shifts -->
       <section id="page-shifts" class="page">
-        <div class="section-title"><div><h3>الورديات</h3><p>آخر الورديات المرفوعة من جهاز الكاشير.</p></div></div>
-        <div class="card pad"><div class="toolbar"><input id="shiftSearch" class="search" placeholder="بحث باسم الكاشير أو رقم الوردية"><span id="shiftCount" class="muted"></span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>الكاشير</th><th>الحالة</th><th>المبيعات</th><th>الفواتير</th><th>افتتاحي</th><th>المتوقع</th><th>الفعلي</th><th>الفرق</th><th>الفتح</th><th>الإغلاق</th><th>إجراء</th></tr></thead><tbody id="shiftsBody"></tbody></table></div></div>
+        <div class="pagehead"><div><h3>الورديات</h3><p>آخر الورديات المرفوعة من جهاز الكاشير.</p></div></div>
+        <div class="panel"><div class="toolbar"><input id="shiftSearch" class="search" placeholder="ابحث باسم الكاشير أو رقم الوردية"><span id="shiftCount" class="muted"></span></div><div class="table-wrap"><table style="min-width:980px"><thead><tr><th>#</th><th>الكاشير</th><th>الحالة</th><th>المبيعات</th><th>الفواتير</th><th>افتتاحي</th><th>المتوقع</th><th>الفعلي</th><th>الفرق</th><th>الفتح</th><th>الإغلاق</th><th>إجراء</th></tr></thead><tbody id="shiftsBody"></tbody></table></div></div>
       </section>
 
+      <!-- inventory -->
       <section id="page-inventory" class="page">
-        <div class="section-title"><div><h3>المخزون والأصناف</h3><p>بحث سريع في الأصناف والأسعار والمخزون.</p></div></div>
-        <div class="card pad"><div class="toolbar"><div class="actions"><input id="productSearch" class="search" placeholder="بحث بالاسم / SKU / باركود"><select id="categoryFilter" style="width:190px"><option value="">كل الأقسام</option></select></div><span id="productCount" class="muted"></span></div><div class="table-wrap"><table><thead><tr><th>الصنف</th><th>القسم</th><th>الوحدة</th><th>السعر</th><th>التكلفة</th><th>المخزون</th><th>حد التنبيه</th><th>SKU</th><th>الحالة</th></tr></thead><tbody id="productsBody"></tbody></table></div></div>
+        <div class="pagehead"><div><h3>المخزون والأصناف</h3><p>بحث سريع في الأصناف والأسعار والمخزون.</p></div></div>
+        <div class="panel"><div class="toolbar"><div class="actions" style="flex:1"><input id="productSearch" class="search" placeholder="ابحث بالاسم أو SKU أو الباركود"><select id="categoryFilter" style="width:190px"><option value="">كل الأقسام</option></select></div><span id="productCount" class="muted"></span></div><div class="table-wrap"><table style="min-width:860px"><thead><tr><th>الصنف</th><th>القسم</th><th>الوحدة</th><th>السعر</th><th>التكلفة</th><th>المخزون</th><th>حد التنبيه</th><th>SKU</th><th>الحالة</th></tr></thead><tbody id="productsBody"></tbody></table></div></div>
       </section>
 
+      <!-- expenses -->
       <section id="page-expenses" class="page">
-        <div class="section-title"><div><h3>المصروفات</h3><p>آخر المصروفات المسجلة على الجهاز.</p></div></div>
-        <div class="card pad"><div class="toolbar"><input id="expenseSearch" class="search" placeholder="بحث في السبب أو التصنيف أو المستخدم"><span id="expenseCount" class="muted"></span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>القيمة</th><th>التصنيف</th><th>السبب</th><th>المستخدم</th><th>التاريخ</th></tr></thead><tbody id="expensesBody"></tbody></table></div></div>
+        <div class="pagehead"><div><h3>المصروفات</h3><p>آخر المصروفات المسجلة على الجهاز.</p></div></div>
+        <div class="panel"><div class="toolbar"><input id="expenseSearch" class="search" placeholder="ابحث في السبب أو التصنيف أو المستخدم"><span id="expenseCount" class="muted"></span></div><div class="table-wrap"><table><thead><tr><th>#</th><th>القيمة</th><th>التصنيف</th><th>السبب</th><th>المستخدم</th><th>التاريخ</th></tr></thead><tbody id="expensesBody"></tbody></table></div></div>
       </section>
 
+      <!-- reports -->
       <section id="page-reports" class="page">
-        <div class="section-title"><div><h3>تقارير المبيعات</h3><p>اختر يومًا أو أسبوعًا أو شهرًا أو أي فترة مخصصة، ثم اعرض التقرير أو نزّله كملف Excel منسق.</p></div><button id="exportReportExcel" class="btn green">تنزيل Excel</button></div>
-        <div class="card pad">
-          <div class="quick-ranges"><button class="chip" data-report-range="today">اليوم</button><button class="chip" data-report-range="week">آخر 7 أيام</button><button class="chip" data-report-range="month">هذا الشهر</button></div>
-          <div class="report-controls"><div><label class="label">من تاريخ</label><input id="reportFrom" type="date"></div><div><label class="label">إلى تاريخ</label><input id="reportTo" type="date"></div><button id="loadReport" class="btn primary">عرض التقرير</button><button id="clearReport" class="btn">مسح</button></div>
-          <div id="reportStatus" class="report-note" style="margin-top:12px">اختر الفترة المطلوبة ثم اضغط «عرض التقرير» لعرض البيانات المتاحة.</div>
+        <div class="pagehead"><div><h3>تقارير المبيعات</h3><p>اختر يومًا أو أسبوعًا أو شهرًا أو أي فترة مخصصة، ثم اعرض التقرير أو نزّله كملف Excel منسق.</p></div><button id="exportReportExcel" class="btn green"><svg class="i"><use href="#i-download"/></svg>تنزيل Excel</button></div>
+        <div class="panel">
+          <div class="quick-ranges"><button class="chip active" data-report-range="today">اليوم</button><button class="chip" data-report-range="week">آخر 7 أيام</button><button class="chip" data-report-range="month">هذا الشهر</button></div>
+          <div class="report-controls">
+            <div><label class="label" for="reportFrom">من تاريخ</label><input id="reportFrom" type="date"></div>
+            <div><label class="label" for="reportTo">إلى تاريخ</label><input id="reportTo" type="date"></div>
+            <button id="loadReport" class="btn primary">عرض التقرير</button>
+            <button id="clearReport" class="btn">مسح</button>
+          </div>
+          <div id="reportStatus" class="report-note">اختر الفترة المطلوبة ثم اضغط «عرض التقرير» لعرض البيانات المتاحة.</div>
         </div>
-        <div class="grid kpi-grid" style="margin-top:14px"><div class="card kpi"><div class="label">إجمالي المبيعات</div><div id="rSales" class="value cyan">0.00</div></div><div class="card kpi"><div class="label">عدد الفواتير</div><div id="rOrders" class="value">0</div></div><div class="card kpi"><div class="label">صافي المبيعات</div><div id="rNet" class="value green-t">0.00</div></div><div class="card kpi"><div class="label">المرتجعات</div><div id="rRefunds" class="value red-t">0.00</div></div></div>
-        <div class="grid half" style="margin-top:14px">
-          <div class="card pad"><div class="toolbar"><h3 style="margin:0">طرق الدفع للفترة</h3></div><div id="reportPaymentBars" class="bar-list"></div></div>
-          <div class="card pad"><div class="toolbar"><h3 style="margin:0">الأصناف خلال الفترة</h3><span id="reportProductCount" class="muted"></span></div><div class="table-wrap"><table><thead><tr><th>الصنف</th><th>الكمية</th><th>المبيعات</th><th>مرتجع كمية</th></tr></thead><tbody id="reportProductsBody"></tbody></table></div></div>
+        <div class="strip" style="margin-top:16px">
+          <div><div class="tl">إجمالي المبيعات</div><div id="rSales" class="tv cyan">0.00</div></div>
+          <div><div class="tl">عدد الفواتير</div><div id="rOrders" class="tv">0</div></div>
+          <div><div class="tl">صافي المبيعات</div><div id="rNet" class="tv green-t">0.00</div></div>
+          <div><div class="tl">المرتجعات</div><div id="rRefunds" class="tv red-t">0.00</div></div>
         </div>
-        <div class="card pad" style="margin-top:14px"><div class="toolbar"><h3 style="margin:0">ملخص الأيام</h3><span id="reportDayCount" class="muted"></span></div><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>المبيعات</th><th>الفواتير</th><th>كاش</th><th>كارت</th><th>إنستاباي</th><th>محفظة</th><th>مرتجعات</th><th>مصروفات</th><th>الصافي</th></tr></thead><tbody id="reportDaysBody"></tbody></table></div></div>
-        <div class="card pad" style="margin-top:14px"><div class="toolbar"><h3 style="margin:0">تفاصيل الفواتير</h3><span id="reportInvoiceCount" class="muted"></span></div><div class="table-wrap"><table><thead><tr><th>الفاتورة</th><th>التاريخ</th><th>الوردية</th><th>الكاشير</th><th>الإجمالي</th><th>الخصم</th><th>الضريبة</th><th>طريقة الدفع</th><th>الحالة</th></tr></thead><tbody id="reportInvoicesBody"></tbody></table></div></div>
+        <div class="panel" style="margin-top:16px"><div class="ph"><h4>المبيعات اليومية</h4></div><div id="reportChart"></div></div>
+        <div class="half" style="margin-top:16px">
+          <div class="panel light-legend"><div class="ph"><h4>طرق الدفع للفترة</h4></div><div id="reportMixBar" class="mixbar"></div><div id="reportPaymentBars" class="mixlegend" style="grid-template-columns:1fr"></div></div>
+          <div class="panel"><div class="ph"><h4>الأصناف خلال الفترة</h4><span id="reportProductCount" class="muted"></span></div><div class="table-wrap" style="max-height:340px"><table style="min-width:440px"><thead><tr><th>الصنف</th><th>الكمية</th><th>المبيعات</th><th>مرتجع كمية</th></tr></thead><tbody id="reportProductsBody"></tbody></table></div></div>
+        </div>
+        <div class="panel" style="margin-top:16px"><div class="ph"><h4>ملخص الأيام</h4><span id="reportDayCount" class="muted"></span></div><div class="table-wrap"><table style="min-width:860px"><thead><tr><th>التاريخ</th><th>المبيعات</th><th>الفواتير</th><th>كاش</th><th>كارت</th><th>إنستاباي</th><th>محفظة</th><th>مرتجعات</th><th>مصروفات</th><th>الصافي</th></tr></thead><tbody id="reportDaysBody"></tbody></table></div></div>
+        <div class="panel" style="margin-top:16px"><div class="ph"><h4>تفاصيل الفواتير</h4><span id="reportInvoiceCount" class="muted"></span></div><div class="table-wrap"><table style="min-width:860px"><thead><tr><th>الفاتورة</th><th>التاريخ</th><th>الوردية</th><th>الكاشير</th><th>الإجمالي</th><th>الخصم</th><th>الضريبة</th><th>طريقة الدفع</th><th>الحالة</th></tr></thead><tbody id="reportInvoicesBody"></tbody></table></div></div>
       </section>
 
+      <!-- updates -->
       <section id="page-updates" class="page">
-        <div class="section-title"><div><h3>تحديثات الكاشير</h3><p>إرسال تعديل قسم أو صنف ليتم تطبيقه على Geek POS عند الاتصال بالإنترنت.</p></div></div>
-        <div class="grid split">
-          <div class="card pad">
+        <div class="pagehead"><div><h3>تحديثات الكاشير</h3><p>أرسل تعديل قسم أو صنف أو طرق الدفع ليُطبَّق على Geek POS عند اتصال الجهاز بالإنترنت.</p></div></div>
+        <div class="split">
+          <div class="panel">
             <div class="update-tabs"><button class="chip active" data-update-tab="category">قسم</button><button class="chip" data-update-tab="product">صنف</button><button class="chip" data-update-tab="payments">طرق الدفع</button></div>
             <form id="categoryForm" class="form-grid">
-              <div><label class="label">اسم القسم</label><input id="catName" required placeholder="مثال: تورت"></div><div><label class="label">الترتيب</label><input id="catOrder" type="number" value="1"></div>
-              <div class="wide"><label class="label">الحالة</label><select id="catActive"><option value="true">نشط</option><option value="false">غير نشط</option></select></div>
+              <div><label class="label" for="catName">اسم القسم</label><input id="catName" required placeholder="مثال: تورت"></div>
+              <div><label class="label" for="catOrder">الترتيب</label><input id="catOrder" type="number" value="1"></div>
+              <div class="wide"><label class="label" for="catActive">الحالة</label><select id="catActive"><option value="true">نشط</option><option value="false">غير نشط</option></select></div>
               <div class="wide"><button class="btn primary full" type="submit">إرسال تحديث القسم</button></div>
             </form>
             <form id="productForm" class="form-grid hidden">
-              <div><label class="label">اسم الصنف بالعربي</label><input id="prodArabic" required></div><div><label class="label">الاسم الإنجليزي</label><input id="prodEnglish"></div>
-              <div><label class="label">القسم</label><input id="prodCategory" list="categoryList"></div><div><label class="label">وحدة البيع</label><select id="prodUnit"><option value="Piece">قطعة</option><option value="Kg">كجم</option><option value="Gram">جرام</option><option value="Box">علبة</option><option value="Pack">باك</option></select></div>
-              <div><label class="label">السعر</label><input id="prodPrice" type="number" step="0.01" value="0"></div><div><label class="label">التكلفة</label><input id="prodCost" type="number" step="0.01" value="0"></div>
-              <div><label class="label">المخزون</label><input id="prodStock" type="number" step="0.001" value="0"></div><div><label class="label">حد التنبيه</label><input id="prodLow" type="number" step="0.001" value="0"></div>
-              <div><label class="label">SKU</label><input id="prodSku"></div><div><label class="label">الباركود</label><input id="prodBarcode"></div>
-              <div><label class="label">تتبع المخزون</label><select id="prodTrack"><option value="true">نعم</option><option value="false">لا</option></select></div><div><label class="label">غير محدد بكمية</label><select id="prodUnlimited"><option value="false">لا</option><option value="true">نعم — بدون مخزون محدد</option></select></div><div><label class="label">الحالة</label><select id="prodActive"><option value="true">نشط</option><option value="false">إيقاف الصنف</option></select></div>
+              <div><label class="label" for="prodArabic">اسم الصنف بالعربي</label><input id="prodArabic" required></div>
+              <div><label class="label" for="prodEnglish">الاسم الإنجليزي</label><input id="prodEnglish"></div>
+              <div><label class="label" for="prodCategory">القسم</label><input id="prodCategory" list="categoryList"></div>
+              <div><label class="label" for="prodUnit">وحدة البيع</label><select id="prodUnit"><option value="Piece">قطعة</option><option value="Kg">كجم</option><option value="Gram">جرام</option><option value="Box">علبة</option><option value="Pack">باك</option></select></div>
+              <div><label class="label" for="prodPrice">السعر</label><input id="prodPrice" type="number" step="0.01" value="0"></div>
+              <div><label class="label" for="prodCost">التكلفة</label><input id="prodCost" type="number" step="0.01" value="0"></div>
+              <div><label class="label" for="prodStock">المخزون</label><input id="prodStock" type="number" step="0.001" value="0"></div>
+              <div><label class="label" for="prodLow">حد التنبيه</label><input id="prodLow" type="number" step="0.001" value="0"></div>
+              <div><label class="label" for="prodSku">SKU</label><input id="prodSku"></div>
+              <div><label class="label" for="prodBarcode">الباركود</label><input id="prodBarcode"></div>
+              <div><label class="label" for="prodTrack">تتبع المخزون</label><select id="prodTrack"><option value="true">نعم</option><option value="false">لا</option></select></div>
+              <div><label class="label" for="prodUnlimited">غير محدد بكمية</label><select id="prodUnlimited"><option value="false">لا</option><option value="true">نعم — بدون مخزون محدد</option></select></div>
+              <div class="wide"><label class="label" for="prodActive">الحالة</label><select id="prodActive"><option value="true">نشط</option><option value="false">إيقاف الصنف</option></select></div>
               <div class="wide"><button class="btn primary full" type="submit">إرسال تحديث الصنف</button></div>
             </form>
             <div id="paymentMethodsForm" class="hidden">
-              <div class="toolbar"><div><h3 style="margin:0">طرق الدفع</h3><div class="muted">فعّل أو أوقف الطرق الحالية، ويمكن إضافة طريقة جديدة.</div></div><button id="addPaymentMethod" class="btn sm" type="button">+ إضافة طريقة</button></div>
+              <div class="toolbar"><div><h4 style="margin:0;font-size:15.5px">طرق الدفع</h4><div class="muted">فعّل أو أوقف الطرق الحالية، ويمكن إضافة طريقة جديدة.</div></div><button id="addPaymentMethod" class="btn sm" type="button"><svg class="i"><use href="#i-plus"/></svg>إضافة طريقة</button></div>
               <div id="paymentMethodsEditor" style="display:grid;gap:10px;margin:14px 0"></div>
               <button id="savePaymentMethods" class="btn primary full" type="button">إرسال طرق الدفع للكاشير</button>
             </div>
             <datalist id="categoryList"></datalist>
           </div>
-          <div class="card pad"><div class="toolbar"><div><h3 style="margin:0">آخر التحديثات</h3><div class="muted">حالة التحديثات المرسلة</div></div><button id="reloadUpdates" class="btn sm">تحديث</button></div><div class="table-wrap"><table><thead><tr><th>#</th><th>النوع</th><th>الحالة</th><th>وقت الإنشاء</th><th>وقت التطبيق</th></tr></thead><tbody id="updatesBody"></tbody></table></div></div>
+          <div class="panel"><div class="ph"><div><h4>آخر التحديثات</h4><div class="muted">حالة التحديثات المرسلة</div></div><button id="reloadUpdates" class="btn sm">تحديث</button></div><div class="table-wrap"><table style="min-width:460px"><thead><tr><th>#</th><th>النوع</th><th>الحالة</th><th>وقت الإنشاء</th><th>وقت التطبيق</th></tr></thead><tbody id="updatesBody"></tbody></table></div></div>
         </div>
       </section>
 
+      <!-- connection -->
       <section id="page-connection" class="page">
-        <div class="section-title"><div><h3>حالة النظام</h3><p>متابعة حالة آخر مزامنة بين لوحة الإدارة وجهاز الكاشير.</p></div></div>
-        <div class="card pad">
-          <div class="toolbar"><div><h3 style="margin:0">بيانات الجهاز</h3><div class="muted">يتم تحديث البيانات تلقائيًا عند اتصال جهاز الكاشير.</div></div><span class="badge ok">متصل</span></div>
-          <div class="stats-row system-stats"><div class="mini"><span>الفرع</span><b id="cStore">—</b></div><div class="mini"><span>إصدار Geek POS</span><b id="cVersion">—</b></div><div class="mini"><span>اسم الجهاز</span><b id="cDevice">—</b></div><div class="mini"><span>آخر مزامنة</span><b id="cUpdated">—</b></div></div>
+        <div class="pagehead"><div><h3>حالة النظام</h3><p>حالة آخر مزامنة بين لوحة الإدارة وجهاز الكاشير.</p></div></div>
+        <div class="panel">
+          <div class="ph"><div><h4>بيانات الجهاز</h4><div class="muted">تتحدث البيانات تلقائيًا عند اتصال جهاز الكاشير.</div></div><span id="connBadge" class="badge ok">متصل</span></div>
+          <div class="sys-grid"><div class="mini"><span>الفرع</span><b id="cStore">—</b></div><div class="mini"><span>إصدار Geek POS</span><b id="cVersion">—</b></div><div class="mini"><span>اسم الجهاز</span><b id="cDevice">—</b></div><div class="mini"><span>آخر مزامنة</span><b id="cUpdated">—</b></div></div>
         </div>
       </section>
+
     </div>
   </main>
+
+  <nav class="bnav" aria-label="التنقل السريع">
+    <button class="active" data-page="overview"><svg class="i"><use href="#i-dash"/></svg>الرئيسية</button>
+    <button data-page="sales"><svg class="i"><use href="#i-trend"/></svg>المبيعات</button>
+    <button data-page="shifts"><svg class="i"><use href="#i-clock"/></svg>الورديات</button>
+    <button data-page="reports"><svg class="i"><use href="#i-report"/></svg>التقارير</button>
+    <button id="moreBtn"><svg class="i"><use href="#i-more"/></svg>المزيد</button>
+  </nav>
 </div>
-<div id="toast" class="toast"></div>
+
+<!-- close shift dialog -->
+<dialog id="shiftDlg" class="dlg">
+  <div class="dlg-body">
+    <h4 id="dlgTitle">إغلاق الوردية</h4>
+    <div class="sub">سيصل الأمر لجهاز الكاشير ويُنفَّذ عند أول اتصال.</div>
+    <div class="dlg-line"><span class="muted">المتوقع في الدرج</span><b id="dlgExpected">—</b></div>
+    <div class="field"><label class="label" for="dlgActual">النقدية الفعلية عند الإغلاق</label><input id="dlgActual" type="number" step="0.01" min="0" inputmode="decimal"></div>
+    <div class="dlg-line" style="border-bottom:0"><span class="muted">الفرق</span><b id="dlgDiff">—</b></div>
+    <div class="field" style="margin-top:6px"><label class="label" for="dlgNotes">ملاحظة الإغلاق (اختياري)</label><input id="dlgNotes"></div>
+    <div class="dlg-actions"><button id="dlgCancel" class="btn" type="button">إلغاء</button><button id="dlgConfirm" class="btn primary" type="button">إغلاق الوردية</button></div>
+  </div>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
 <script>
   const SUPABASE_URL='https://xquuknplqqcjmalxrsop.supabase.co';
   const SUPABASE_KEY='sb_publishable__Emrq-KtGpYkE40Zshirsw_Y-MvQ4s1';
@@ -426,5 +650,439 @@
   $('exportProducts').onclick=exportCsv;
   sb.auth.getSession().then(async({data})=>{if(data.session)await startApp(data.session.user)});
 </script>
+
+<script>
+/* ===== واجهة جديدة: تحسينات فوق منطق التطبيق الأصلي ===== */
+(function(){
+  const STALE_MIN=15;
+  const root=document.documentElement;
+  const icon=n=>`<svg class="i"><use href="#i-${n}"/></svg>`;
+
+  /* theme */
+  function applyTheme(t){
+    root.setAttribute('data-theme',t);
+    try{localStorage.setItem('geekpos-theme',t)}catch(e){}
+    $('themeBtn').innerHTML=icon(t==='dark'?'sun':'moon');
+    const m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='dark'?'#0B1311':'#EEF1EF';
+  }
+  $('themeBtn').onclick=()=>applyTheme(root.getAttribute('data-theme')==='dark'?'light':'dark');
+  applyTheme(root.getAttribute('data-theme')||'light');
+
+  /* payment mix */
+  const PAY=[['كاش','cash'],['فيزا / كارت','card'],['إنستاباي','insta'],['محفظة','wallet']];
+  function mix(barEl,legendEl,vals){
+    const total=vals.reduce((a,b)=>a+b,0);
+    barEl.innerHTML=total>0?vals.map((v,i)=>v>0?`<i style="flex:${v};background:var(--p-${PAY[i][1]})" title="${PAY[i][0]}"></i>`:'').join(''):'<i class="none" style="flex:1"></i>';
+    legendEl.innerHTML=vals.map((v,i)=>`<div class="lg"><span class="dot" style="background:var(--p-${PAY[i][1]})"></span><span class="ln">${PAY[i][0]}</span><b>${money(v)}</b><em>${(total?Math.round(v/total*100):0).toLocaleString('ar-EG')}٪</em></div>`).join('');
+  }
+  function curSplit(id){
+    const el=$(id);if(!el)return;const t=el.textContent;
+    if(t.endsWith(' جنيه'))el.innerHTML=esc(t.slice(0,-5))+'<span class="cur">جنيه</span>';
+  }
+
+  /* live / sync state */
+  function relTime(iso){
+    const m=Math.floor((Date.now()-new Date(iso))/60000);
+    if(m<1)return 'الآن';
+    if(m<60)return 'منذ '+m.toLocaleString('ar-EG')+' دقيقة';
+    const h=Math.floor(m/60);if(h<24)return 'منذ '+h.toLocaleString('ar-EG')+' ساعة';
+    return 'منذ '+Math.floor(h/24).toLocaleString('ar-EG')+' يوم';
+  }
+  function updateLive(){
+    const live=document.querySelector('.live'),sp=live.querySelector('span'),cb=$('connBadge');
+    if(!currentRow){sp.textContent='بانتظار البيانات';live.classList.add('stale');return}
+    const m=(Date.now()-new Date(currentRow.updated_at))/60000,stale=m>STALE_MIN;
+    sp.textContent='آخر مزامنة '+relTime(currentRow.updated_at);
+    live.classList.toggle('stale',stale);
+    if(cb){cb.textContent=stale?'متأخر':'متصل';cb.className='badge '+(stale?'warn':'ok')}
+  }
+  setInterval(updateLive,30000);
+
+  /* report extras */
+  function reportExtras(){
+    const a=reportAggregate();
+    mix($('reportMixBar'),$('reportPaymentBars'),[a.cash,a.card,a.instaPay,a.wallet]);
+    ['rSales','rNet','rRefunds'].forEach(curSplit);
+    const box=$('reportChart');
+    if(!reportRows.length){box.innerHTML='<div class="empty">اعرض تقريرًا لتظهر مبيعات كل يوم هنا</div>';return}
+    const vals=reportRows.map(r=>num(val(val(r.payload,'summary','Summary')||{},'sales','Sales'))),mx=Math.max(...vals,1);
+    box.innerHTML=`<div class="bars ${reportRows.length>14?'dense':''}">`+reportRows.map((r,i)=>{
+      const d=String(r.report_date).split('-');
+      return `<div class="bcol" title="${esc(r.report_date)} — ${money(vals[i])}"><span class="bval">${Math.round(vals[i]).toLocaleString('ar-EG')}</span><div class="btrack"><div class="bfill" style="height:${Math.max(2,vals[i]/mx*100)}%"></div></div><span class="blabel">${Number(d[2]).toLocaleString('ar-EG')}/${Number(d[1]).toLocaleString('ar-EG')}</span></div>`;
+    }).join('')+'</div>';
+  }
+
+  /* wrap original renderers */
+  const _renderReport=renderReport;
+  renderReport=function(){_renderReport();reportExtras()};
+
+  const _renderAll=renderAll;
+  renderAll=function(){
+    _renderAll();
+    const s=summary();
+    mix($('mixBar'),$('paymentBars'),[num(val(s,'cash','Cash')),num(val(s,'card','Card')),num(val(s,'instaPay','إنستاباي')),num(val(s,'wallet','Wallet'))]);
+    ['kSales','kNet','kExpenses','mRefunds','mProfit','sCash','sCard','sInsta','sWallet'].forEach(curSplit);
+    updateLive();
+  };
+
+  const _loadSnapshots=loadSnapshots;
+  loadSnapshots=async function(silent){
+    $('refreshBtn').classList.add('busy');
+    try{await _loadSnapshots(silent)}finally{$('refreshBtn').classList.remove('busy')}
+  };
+
+  /* navigation: bottom bar + drawer scrim */
+  const sidebar=$('sidebar'),scrim=$('scrim');
+  const _changePage=changePage;
+  changePage=function(n){
+    _changePage(n);
+    document.querySelectorAll('.bnav button[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===n));
+    $('moreBtn').classList.toggle('active',!['overview','sales','shifts','reports'].includes(n));
+    scrim.classList.remove('show');
+    window.scrollTo({top:0});
+  };
+  document.querySelectorAll('.bnav button[data-page]').forEach(b=>b.onclick=()=>changePage(b.dataset.page));
+  $('moreBtn').onclick=()=>{sidebar.classList.add('open');scrim.classList.add('show')};
+  $('menuBtn').addEventListener('click',()=>scrim.classList.toggle('show',sidebar.classList.contains('open')));
+  scrim.onclick=()=>{sidebar.classList.remove('open');scrim.classList.remove('show')};
+
+  /* close-shift dialog (replaces confirm/prompt) */
+  let closingShift=null;
+  const dlg=$('shiftDlg');
+  function dlgDiff(){
+    const raw=$('dlgActual').value,el=$('dlgDiff');
+    if(raw===''||!Number.isFinite(Number(raw))){el.textContent='—';el.className='';return}
+    const d=Number(raw)-(closingShift?closingShift.expected:0);
+    el.textContent=d===0?'مطابق':(d>0?'زيادة ':'عجز ')+money(Math.abs(d));
+    el.className=d<0?'red-t':d>0?'yellow':'green-t';
+  }
+  closeShiftOnline=function(id,expected){
+    closingShift={id,expected:Number(expected||0)};
+    $('dlgTitle').textContent='إغلاق الوردية #'+Number(id).toLocaleString('ar-EG');
+    $('dlgExpected').textContent=money(expected);
+    $('dlgActual').value=Number(expected||0).toFixed(2);
+    $('dlgNotes').value='إغلاق من لوحة Geek POS Online';
+    dlgDiff();dlg.showModal();
+  };
+  $('dlgActual').oninput=dlgDiff;
+  $('dlgCancel').onclick=()=>dlg.close();
+  dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
+  $('dlgConfirm').onclick=async()=>{
+    const raw=$('dlgActual').value,actual=Number(raw);
+    if(raw===''||!Number.isFinite(actual)||actual<0){toast('قيمة النقدية الفعلية غير صحيحة','error');return}
+    const btn=$('dlgConfirm');btn.disabled=true;
+    try{
+      await sendUpdate('close_shift',{shiftId:closingShift.id,actualCash:actual,notes:$('dlgNotes').value.trim()});
+      dlg.close();toast('تم إرسال أمر إغلاق الوردية بنجاح.');setTimeout(()=>loadSnapshots(true),18000);
+    }catch(e){toast('تعذر إرسال أمر إغلاق الوردية حاليًا. حاول مرة أخرى.','error')}
+    finally{btn.disabled=false}
+  };
+
+  renderReport();
+})();
+</script>
+
+<script>
+/* ===== Multi-branch ALL mode: aggregate every accessible branch while keeping branch-local shift numbers ===== */
+(function(){
+  const ALL='__ALL__';
+
+  function isAll(){return currentRow?.store_id===ALL}
+  function storeIds(){return [...new Set(snapshots.map(x=>String(x.store_id||'').trim()).filter(Boolean))]}
+  function latestIso(rows){return rows.map(x=>x?.updated_at).filter(Boolean).sort().at(-1)||null}
+  function oldestIso(rows){return rows.map(x=>x?.updated_at).filter(Boolean).sort()[0]||null}
+  function withStore(items,storeId){return (items||[]).map(x=>Object.assign({},x,{__storeId:storeId}))}
+
+  function sumSummary(rows,key){
+    const out={sales:0,orders:0,averageOrder:0,cash:0,card:0,instaPay:0,wallet:0,expenses:0,refunds:0,netSales:0,estimatedGrossProfit:0};
+    for(const row of rows){
+      const p=row?.payload||{};let s=val(p,key,key[0].toUpperCase()+key.slice(1))||{};if(key==='openShiftSummary'&&!Object.keys(s).length)s=val(p,'summary','Summary')||{};
+      out.sales+=num(val(s,'sales','Sales'));
+      out.orders+=num(val(s,'orders','Orders'));
+      out.cash+=num(val(s,'cash','Cash'));
+      out.card+=num(val(s,'card','Card'));
+      out.instaPay+=num(val(s,'instaPay','InstaPay','إنستاباي'));
+      out.wallet+=num(val(s,'wallet','Wallet'));
+      out.expenses+=num(val(s,'expenses','Expenses'));
+      out.refunds+=num(val(s,'refunds','Refunds'));
+      out.netSales+=num(val(s,'netSales','NetSales'));
+      out.estimatedGrossProfit+=num(val(s,'estimatedGrossProfit','EstimatedGrossProfit'));
+    }
+    out.averageOrder=out.orders?out.sales/out.orders:0;
+    return out;
+  }
+
+  function aggregateTopProducts(rows,key){
+    const map=new Map();
+    for(const row of rows){
+      const list=val(row?.payload||{},key,key[0].toUpperCase()+key.slice(1))||[];
+      for(const x of list){
+        const name=String(val(x,'productName','ProductName','name','Name')||'—');
+        const k=name.trim().toLowerCase();
+        const cur=map.get(k)||{productName:name,quantity:0,sales:0};
+        cur.quantity+=num(val(x,'quantity','Quantity'));
+        cur.sales+=num(val(x,'sales','Sales'));
+        map.set(k,cur);
+      }
+    }
+    return [...map.values()].sort((a,b)=>b.sales-a.sales).slice(0,50);
+  }
+
+  function aggregateCategories(rows){
+    const map=new Map();
+    for(const row of rows)for(const x of (val(row?.payload||{},'categories','Categories')||[])){
+      const name=String(val(x,'name','Name')||'').trim();if(!name)continue;
+      if(!map.has(name.toLowerCase()))map.set(name.toLowerCase(),Object.assign({},x));
+    }
+    return [...map.values()];
+  }
+
+  function aggregateProducts(rows){
+    const map=new Map();
+    for(const row of rows){
+      const sid=row.store_id;
+      for(const x of (val(row?.payload||{},'products','Products')||[])){
+        const name=String(val(x,'arabicName','ArabicName','name','Name')||'—');
+        const sku=String(val(x,'sku','Sku')||'').trim();
+        const barcode=String(val(x,'barcode','Barcode')||'').trim();
+        const category=String(val(x,'category','Category')||'');
+        const key=(sku||barcode||`${name}|${category}`).toLowerCase();
+        let cur=map.get(key);
+        if(!cur){
+          cur=Object.assign({},x,{__stores:new Set(),stockQuantity:0,lowStockLimit:0});
+          map.set(key,cur);
+        }
+        cur.__stores.add(sid);
+        const unlimited=val(x,'unlimitedQuantity','UnlimitedQuantity')===true||val(x,'trackStock','TrackStock')===false;
+        if(unlimited){
+          cur.unlimitedQuantity=true;cur.trackStock=false;
+        }else{
+          cur.stockQuantity=num(cur.stockQuantity)+num(val(x,'stockQuantity','StockQuantity'));
+          cur.lowStockLimit=num(cur.lowStockLimit)+num(val(x,'lowStockLimit','LowStockLimit'));
+        }
+      }
+    }
+    return [...map.values()].map(x=>{x.__stores=[...(x.__stores||[])];return x});
+  }
+
+  function aggregateLowStock(rows){
+    const map=new Map();
+    for(const row of rows){
+      for(const x of (val(row?.payload||{},'lowStock','LowStock')||[])){
+        const name=String(val(x,'arabicName','ArabicName','name','Name')||'—');
+        const sku=String(val(x,'sku','Sku')||'').trim();
+        const key=(sku||name).toLowerCase();
+        let cur=map.get(key);
+        if(!cur){cur=Object.assign({},x,{stockQuantity:0,lowStockLimit:0,__stores:[]});map.set(key,cur)}
+        cur.stockQuantity=num(cur.stockQuantity)+num(val(x,'stockQuantity','StockQuantity'));
+        cur.lowStockLimit=num(cur.lowStockLimit)+num(val(x,'lowStockLimit','LowStockLimit'));
+        cur.__stores.push(row.store_id);
+      }
+    }
+    return [...map.values()];
+  }
+
+  function buildAllPayload(){
+    return {
+      summary:sumSummary(snapshots,'summary'),
+      openShiftSummary:sumSummary(snapshots,'openShiftSummary'),
+      topProducts:aggregateTopProducts(snapshots,'topProducts'),
+      openShiftTopProducts:aggregateTopProducts(snapshots,'openShiftTopProducts'),
+      categories:aggregateCategories(snapshots),
+      products:aggregateProducts(snapshots),
+      lowStock:aggregateLowStock(snapshots),
+      shifts:snapshots.flatMap(r=>withStore(val(r.payload||{},'shifts','Shifts')||[],r.store_id)),
+      expenses:snapshots.flatMap(r=>withStore(val(r.payload||{},'expenses','Expenses')||[],r.store_id)),
+      refunds:snapshots.flatMap(r=>withStore(val(r.payload||{},'refunds','Refunds')||[],r.store_id)),
+      sales:snapshots.flatMap(r=>withStore(val(r.payload||{},'sales','Sales')||[],r.store_id)),
+      paymentMethods:val(snapshots[0]?.payload||{},'paymentMethods','PaymentMethods')||[]
+    };
+  }
+
+  function selectCurrent(value){
+    reportRows=[];
+    if(value===ALL){
+      currentRow={
+        store_id:ALL,
+        app_version:[...new Set(snapshots.map(x=>x.app_version).filter(Boolean))].join(' / ')||'—',
+        device_name:`${snapshots.length} فروع`,
+        updated_at:oldestIso(snapshots)
+      };
+      currentPayload=buildAllPayload();
+      $('storeSelect').value=ALL;
+    }else{
+      const row=snapshots.find(x=>x.store_id===value)||snapshots[0];
+      currentRow=row||null;
+      currentPayload=row?.payload||{};
+      $('storeSelect').value=row?.store_id||'';
+    }
+    renderAll();
+    loadUpdates(true);
+  }
+
+  renderStoreOptions=function(){
+    const prev=$('storeSelect').value||ALL;
+    const opts=[`<option value="${ALL}">ALL — كل الفروع</option>`]
+      .concat(snapshots.map(x=>`<option value="${esc(x.store_id)}">${esc(x.store_id)}</option>`));
+    $('storeSelect').innerHTML=opts.join('');
+    $('storeSelect').value=(prev===ALL||snapshots.some(x=>x.store_id===prev))?prev:ALL;
+  };
+
+  loadSnapshots=async function(silent=false){
+    $('refreshBtn').classList.add('busy');
+    try{
+      const {data,error}=await sb.from('pos_snapshots').select('store_id,app_version,device_name,updated_at,payload').order('updated_at',{ascending:false});
+      if(error)throw error;
+      snapshots=data||[];
+      const wanted=$('storeSelect').value||ALL;
+      renderStoreOptions();
+      if(!snapshots.length){
+        currentRow=null;currentPayload={};reportRows=[];renderAll();
+        if(!silent)toast('لا توجد بيانات متاحة من أجهزة الكاشير حتى الآن.','error');
+        return;
+      }
+      selectCurrent(wanted===ALL||snapshots.some(x=>x.store_id===wanted)?wanted:ALL);
+      if(!silent)toast(isAll()?'تم تحديث بيانات كل الفروع':'تم تحديث بيانات الفرع');
+    }catch(e){
+      if(!silent)toast('تعذر تحديث البيانات حاليًا. تحقق من الاتصال وحاول مرة أخرى.','error');
+    }finally{$('refreshBtn').classList.remove('busy')}
+  };
+
+  $('storeSelect').onchange=()=>selectCurrent($('storeSelect').value);
+
+  const baseOverview=renderOverview;
+  renderOverview=function(){
+    baseOverview();
+    if(isAll()){
+      $('lastUpdated').textContent=snapshots.length
+        ?`كل الفروع (${snapshots.length}) • أقدم مزامنة: ${dt(oldestIso(snapshots))}`
+        :'لا توجد بيانات بعد';
+    }
+  };
+
+  renderConnection=function(){
+    if(isAll()){
+      const versions=[...new Set(snapshots.map(x=>x.app_version).filter(Boolean))];
+      $('cStore').textContent=`ALL — ${snapshots.length} فروع`;
+      $('cVersion').textContent=versions.join(' / ')||'—';
+      $('cDevice').textContent=`${snapshots.length} جهاز / فرع`;
+      $('cUpdated').textContent=oldestIso(snapshots)?'أقدم مزامنة: '+dt(oldestIso(snapshots)):'—';
+      return;
+    }
+    $('cStore').textContent=currentRow?.store_id||'—';
+    $('cVersion').textContent=currentRow?.app_version||'—';
+    $('cDevice').textContent=currentRow?.device_name||'—';
+    $('cUpdated').textContent=currentRow?dt(currentRow.updated_at):'—';
+  };
+
+  renderShifts=function(){
+    const q=$('shiftSearch')?.value?.trim().toLowerCase()||'';
+    let rows=arr('shifts','Shifts');
+    if(q)rows=rows.filter(x=>
+      String(val(x,'user','User','userName','UserName')||'').toLowerCase().includes(q)||
+      String(val(x,'id','Id')||'').includes(q)||
+      String(x.__storeId||'').toLowerCase().includes(q)
+    );
+    $('shiftCount').textContent=rows.length+' وردية';
+    $('shiftsBody').innerHTML=rows.length?rows.map(x=>{
+      const id=num(val(x,'id','Id')),status=val(x,'status','Status'),open=isOpen(status),expected=num(val(x,'expectedCash','ExpectedCash')),sid=x.__storeId||currentRow?.store_id||'';
+      const branch=isAll()?`<span class="branch-note">${esc(sid)}</span>`:'';
+      const action=open
+        ?(isAll()?'<span class="muted">اختر الفرع للإغلاق</span>':`<button class="btn sm danger-action" onclick="closeShiftOnline(${id},${expected})">إغلاق الوردية</button>`)
+        :'—';
+      return `<tr><td>${esc(id)}${branch}</td><td>${esc(val(x,'user','User','userName','UserName')||'—')}</td><td>${badgeStatus(status)}</td><td class="cyan"><strong>${money(val(x,'sales','Sales'))}</strong></td><td>${num(val(x,'orders','Orders')).toLocaleString('ar-EG')}</td><td>${money(val(x,'openingCash','OpeningCash'))}</td><td>${money(expected)}</td><td>${val(x,'actualCash','ActualCash')==null?'—':money(val(x,'actualCash','ActualCash'))}</td><td class="${num(val(x,'difference','Difference'))<0?'red-t':num(val(x,'difference','Difference'))>0?'yellow':''}">${val(x,'difference','Difference')==null?'—':money(val(x,'difference','Difference'))}</td><td>${dt(val(x,'openedAt','OpenedAt'))}</td><td>${dt(val(x,'closedAt','ClosedAt'))}</td><td>${action}</td></tr>`;
+    }).join(''):`<tr><td colspan="12" class="empty">لا توجد ورديات</td></tr>`;
+  };
+
+  const baseExpenses=renderExpenses;
+  renderExpenses=function(){
+    baseExpenses();
+    if(!isAll())return;
+    const q=$('expenseSearch')?.value?.trim().toLowerCase()||'';
+    let rows=arr('expenses','Expenses');
+    if(q)rows=rows.filter(x=>[val(x,'category','Category'),val(x,'reason','Reason'),val(x,'user','User'),x.__storeId].join(' ').toLowerCase().includes(q));
+    $('expenseCount').textContent=rows.length+' مصروف';
+    $('expensesBody').innerHTML=rows.length?rows.map(x=>`<tr><td>${esc(val(x,'id','Id'))}<span class="branch-note">${esc(x.__storeId||'')}</span></td><td class="yellow"><strong>${money(val(x,'amount','Amount'))}</strong></td><td>${esc(val(x,'category','Category')||'—')}</td><td>${esc(val(x,'reason','Reason')||'—')}</td><td>${esc(val(x,'user','User')||'—')}</td><td>${dt(val(x,'createdAt','CreatedAt'))}</td></tr>`).join(''):`<tr><td colspan="6" class="empty">لا توجد مصروفات</td></tr>`;
+  };
+
+  const baseSendUpdate=sendUpdate;
+  sendUpdate=async function(type,payload){
+    if(isAll()){
+      toast('اختر فرعًا محددًا أولًا قبل إرسال أي تحديث للكاشير.','error');
+      throw new Error('select-branch');
+    }
+    return baseSendUpdate(type,payload);
+  };
+
+  loadUpdates=async function(silent=false){
+    const ids=storeIds();
+    if(!currentRow?.store_id||!ids.length){
+      $('updatesBody').innerHTML='<tr><td colspan="5" class="empty">لا توجد فروع لعرض التحديثات</td></tr>';return;
+    }
+    try{
+      let q=sb.from('pos_updates').select('id,store_id,update_type,status,created_at,applied_at').order('id',{ascending:false}).limit(100);
+      q=isAll()?q.in('store_id',ids):q.eq('store_id',currentRow.store_id);
+      const {data,error}=await q;if(error)throw error;
+      $('updatesBody').innerHTML=(data||[]).length?data.map(x=>`<tr><td>${x.id}</td><td>${esc(x.update_type)}${isAll()?`<span class="branch-note">${esc(x.store_id)}</span>`:''}</td><td>${badgeStatus(x.status)}</td><td>${dt(x.created_at)}</td><td>${dt(x.applied_at)}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">لا توجد تحديثات مرسلة</td></tr>';
+    }catch(e){if(!silent)toast('تعذر تحميل سجل التحديثات حاليًا.','error')}
+  };
+
+  function mergeDailyRows(rows){
+    const groups=new Map();
+    for(const r of rows){
+      const d=r.report_date;
+      if(!groups.has(d))groups.set(d,[]);
+      groups.get(d).push(r);
+    }
+    return [...groups.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(([date,rs])=>{
+      const summaryRows=rs.map(r=>({payload:{summary:val(r.payload||{},'summary','Summary')||{}}}));
+      const payload={
+        summary:sumSummary(summaryRows,'summary'),
+        products:rs.flatMap(r=>withStore(val(r.payload||{},'products','Products')||[],r.store_id)),
+        sales:rs.flatMap(r=>withStore(val(r.payload||{},'sales','Sales')||[],r.store_id)),
+        expenses:rs.flatMap(r=>withStore(val(r.payload||{},'expenses','Expenses')||[],r.store_id)),
+        refunds:rs.flatMap(r=>withStore(val(r.payload||{},'refunds','Refunds')||[],r.store_id))
+      };
+      return {store_id:ALL,report_date:date,updated_at:latestIso(rs),payload};
+    });
+  }
+
+  loadReport=async function(){
+    const from=$('reportFrom').value,to=$('reportTo').value;
+    if(!from||!to){toast('حدد تاريخ البداية والنهاية','error');return}
+    if(from>to){toast('تاريخ البداية يجب أن يسبق تاريخ النهاية','error');return}
+    $('loadReport').disabled=true;$('reportStatus').textContent='جاري تجهيز التقرير...';
+    try{
+      if(!currentRow?.store_id)throw new Error('store');
+      let q=sb.from('pos_daily_reports').select('store_id,report_date,updated_at,payload').gte('report_date',from).lte('report_date',to).order('report_date',{ascending:true});
+      if(isAll()){
+        const ids=storeIds();if(!ids.length)throw new Error('stores');
+        q=q.in('store_id',ids);
+      }else q=q.eq('store_id',currentRow.store_id);
+      const {data,error}=await q;if(error)throw error;
+      reportRows=isAll()?mergeDailyRows(data||[]):(data||[]);
+      renderReport();
+      $('reportStatus').textContent=isAll()
+        ?`تم تحميل تقرير كل الفروع: ${reportRows.length} يوم عبر ${snapshots.length} فروع من ${from} إلى ${to}.`
+        :`تم تحميل بيانات ${reportRows.length} يوم للفرع ${currentRow.store_id} من ${from} إلى ${to}.`;
+    }catch(e){
+      reportRows=[];renderReport();
+      $('reportStatus').textContent='تعذر تحميل بيانات التقرير حاليًا. تأكد من اتصال أجهزة الكاشير ثم أعد المحاولة.';
+      toast($('reportStatus').textContent,'error');
+    }finally{$('loadReport').disabled=false}
+  };
+  $('loadReport').onclick=loadReport;
+
+  const oldExport=exportReportExcel;
+  exportReportExcel=async function(){
+    await oldExport();
+  };
+  $('exportReportExcel').onclick=exportReportExcel;
+
+  // Re-render after installing the ALL-aware renderers when a session already exists.
+  if(snapshots.length)selectCurrent($('storeSelect').value||ALL);
+})();
+</script>
+
 </body>
 </html>
