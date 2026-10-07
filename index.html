@@ -397,6 +397,7 @@ tbody tr:last-child td{border-bottom:0}
       <button data-page="inventory"><svg class="i"><use href="#i-box"/></svg>المخزون والأصناف</button>
       <button data-page="expenses"><svg class="i"><use href="#i-receipt"/></svg>المصروفات</button>
       <button data-page="reports"><svg class="i"><use href="#i-report"/></svg>التقارير</button>
+      <button data-page="customers"><svg class="i"><use href="#i-dash"/></svg>العملاء</button>
       <button data-page="updates"><svg class="i"><use href="#i-send"/></svg>تحديثات الكاشير</button>
       <button data-page="connection"><svg class="i"><use href="#i-pulse"/></svg>حالة النظام</button>
     </nav>
@@ -510,6 +511,33 @@ tbody tr:last-child td{border-bottom:0}
         <div class="panel" style="margin-top:16px"><div class="ph"><h4>تفاصيل الفواتير</h4><span id="reportInvoiceCount" class="muted"></span></div><div class="table-wrap"><table style="min-width:860px"><thead><tr><th>الفاتورة</th><th>التاريخ</th><th>الوردية</th><th>الكاشير</th><th>الإجمالي</th><th>الخصم</th><th>الضريبة</th><th>طريقة الدفع</th><th>الحالة</th></tr></thead><tbody id="reportInvoicesBody"></tbody></table></div></div>
       </section>
 
+      <!-- customers -->
+      <section id="page-customers" class="page">
+        <div class="pagehead">
+          <div><h3>عملاء الدليفري</h3><p>قاعدة عملاء موحدة قادمة من أجهزة Geek POS، مع الاسم والموبايل والعنوان والمنطقة وتاريخ التعامل.</p></div>
+          <button id="exportCustomersExcel" class="btn green"><svg class="i"><use href="#i-download"/></svg>تصدير Excel</button>
+        </div>
+        <div class="strip" style="margin-bottom:16px">
+          <div><div class="tl">عدد العملاء</div><div id="customerTotal" class="tv">0</div></div>
+          <div><div class="tl">إجمالي الطلبات</div><div id="customerOrders" class="tv">0</div></div>
+          <div><div class="tl">إجمالي التعامل</div><div id="customerSpent" class="tv green-t">0.00 جنيه</div></div>
+          <div><div class="tl">الفرع</div><div id="customerStore" class="tv" style="font-size:18px">—</div></div>
+        </div>
+        <div class="panel">
+          <div class="toolbar">
+            <input id="customerSearch" class="search" placeholder="ابحث بالاسم أو الموبايل أو المنطقة أو العنوان">
+            <span id="customerCount" class="muted"></span>
+          </div>
+          <div id="customerStatus" class="report-note" style="margin-bottom:12px">يتم تحميل العملاء عند اختيار الفرع.</div>
+          <div class="table-wrap">
+            <table style="min-width:980px">
+              <thead><tr><th>اسم العميل</th><th>رقم الموبايل</th><th>العنوان</th><th>المنطقة</th><th>عدد الطلبات</th><th>إجمالي التعامل</th><th>آخر طلب</th></tr></thead>
+              <tbody id="customersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- updates -->
       <section id="page-updates" class="page">
         <div class="pagehead"><div><h3>تحديثات الكاشير</h3><p>أرسل تعديل قسم أو صنف أو طرق الدفع ليُطبَّق على Geek POS عند اتصال الجهاز بالإنترنت.</p></div></div>
@@ -590,8 +618,8 @@ tbody tr:last-child td{border-bottom:0}
   const SUPABASE_KEY='sb_publishable__Emrq-KtGpYkE40Zshirsw_Y-MvQ4s1';
   const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   const $=id=>document.getElementById(id);
-  let snapshots=[],currentRow=null,currentPayload={},refreshTimer=null,updateTab='category',reportRows=[];
-  const pageMeta={overview:['نظرة عامة','متابعة لحظية لبيانات Geek POS'],sales:['المبيعات','إجماليات الورديات المفتوحة وطرق الدفع'],shifts:['الورديات','متابعة الورديات المفتوحة والمغلقة وإغلاق الوردية أونلاين'],inventory:['المخزون والأصناف','الأصناف والأسعار وحالة المخزون'],expenses:['المصروفات','تفاصيل المصروفات المسجلة'],reports:['التقارير','تقارير يومية وأسبوعية وشهرية وفترات مخصصة مع Excel'],updates:['تحديثات الكاشير','إرسال أقسام وأصناف وأوامر للأجهزة'],connection:['حالة النظام','آخر مزامنة وبيانات جهاز الكاشير']};
+  let snapshots=[],currentRow=null,currentPayload={},refreshTimer=null,updateTab='category',reportRows=[],customers=[];
+  const pageMeta={overview:['نظرة عامة','متابعة لحظية لبيانات Geek POS'],sales:['المبيعات','إجماليات الورديات المفتوحة وطرق الدفع'],shifts:['الورديات','متابعة الورديات المفتوحة والمغلقة وإغلاق الوردية أونلاين'],inventory:['المخزون والأصناف','الأصناف والأسعار وحالة المخزون'],expenses:['المصروفات','تفاصيل المصروفات المسجلة'],reports:['التقارير','تقارير يومية وأسبوعية وشهرية وفترات مخصصة مع Excel'],customers:['العملاء','قاعدة عملاء الدليفري وتصديرها إلى Excel'],updates:['تحديثات الكاشير','إرسال أقسام وأصناف وأوامر للأجهزة'],connection:['حالة النظام','آخر مزامنة وبيانات جهاز الكاشير']};
   const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
   const val=(o,...keys)=>{for(const k of keys)if(o&&o[k]!==undefined&&o[k]!==null)return o[k];return undefined};
   const num=v=>Number(v||0);
@@ -634,8 +662,8 @@ tbody tr:last-child td{border-bottom:0}
     }catch(e){if(!silent)toast('تعذر تحديث البيانات حاليًا. تحقق من الاتصال وحاول مرة أخرى.','error')}
   }
   function renderStoreOptions(){const prev=$('storeSelect').value;$('storeSelect').innerHTML=snapshots.map(x=>`<option value="${esc(x.store_id)}">${esc(x.store_id)}</option>`).join('');if(prev&&snapshots.some(x=>x.store_id===prev))$('storeSelect').value=prev}
-  function selectSnapshot(row){currentRow=row;currentPayload=row?.payload||{};$('storeSelect').value=row?.store_id||'';reportRows=[];renderAll();loadUpdates(true)}
-  function renderAll(){renderOverview();renderSales();renderShifts();renderProducts();renderExpenses();renderConnection();renderReport()}
+  function selectSnapshot(row){currentRow=row;currentPayload=row?.payload||{};$('storeSelect').value=row?.store_id||'';reportRows=[];customers=[];renderAll();loadUpdates(true);loadCustomers(true)}
+  function renderAll(){renderOverview();renderSales();renderShifts();renderProducts();renderExpenses();renderCustomers();renderConnection();renderReport()}
   function renderOverview(){
     const s=summary();const sales=num(val(s,'sales','Sales')),orders=num(val(s,'orders','Orders')),avg=num(val(s,'averageOrder','AverageOrder')),expenses=num(val(s,'expenses','Expenses')),refunds=num(val(s,'refunds','Refunds')),net=num(val(s,'netSales','NetSales')),profit=num(val(s,'estimatedGrossProfit','EstimatedGrossProfit'));
     $('kSales').textContent=money(sales);$('kOrders').textContent=orders.toLocaleString('ar-EG');$('kAvg').textContent=money(avg);$('kNet').textContent=money(net);$('kExpenses').textContent=money(expenses);$('mRefunds').textContent=money(refunds);$('mProfit').textContent=money(profit);
@@ -662,6 +690,67 @@ tbody tr:last-child td{border-bottom:0}
   function renderProducts(){const all=arr('products','Products'),cats=arr('categories','Categories');const current=$('categoryFilter')?.value||'';$('categoryFilter').innerHTML='<option value="">كل الأقسام</option>'+cats.map(x=>`<option value="${esc(val(x,'name','Name'))}">${esc(val(x,'name','Name'))}</option>`).join('');$('categoryFilter').value=current;$('categoryList').innerHTML=cats.map(x=>`<option value="${esc(val(x,'name','Name'))}"></option>`).join('');const q=$('productSearch')?.value?.trim().toLowerCase()||'',cat=$('categoryFilter')?.value||'';let rows=all.filter(x=>{const hay=[val(x,'arabicName','ArabicName'),val(x,'name','Name'),val(x,'sku','Sku'),val(x,'barcode','Barcode')].join(' ').toLowerCase();return(!q||hay.includes(q))&&(!cat||val(x,'category','Category')===cat)});$('productCount').textContent=rows.length+' صنف';$('productsBody').innerHTML=rows.length?rows.map(x=>{const stock=num(val(x,'stockQuantity','StockQuantity')),low=num(val(x,'lowStockLimit','LowStockLimit')),active=val(x,'isActive','IsActive')!==false,unlimited=val(x,'unlimitedQuantity','UnlimitedQuantity')===true||val(x,'trackStock','TrackStock')===false;return `<tr><td><strong>${esc(val(x,'arabicName','ArabicName')||val(x,'name','Name')||'—')}</strong></td><td>${esc(val(x,'category','Category')||'—')}</td><td>${esc(unitAr(val(x,'unit','Unit')))}</td><td>${money(val(x,'price','Price'))}</td><td>${money(val(x,'cost','Cost'))}</td><td class="${!unlimited&&stock<=low?'yellow':''}">${unlimited?'غير محدد':qty(stock)}</td><td>${qty(low)}</td><td>${esc(val(x,'sku','Sku')||'—')}</td><td><span class="badge ${active?'ok':'danger'}">${active?'نشط':'موقوف'}</span></td></tr>`}).join(''):`<tr><td colspan="9" class="empty">لا توجد أصناف مطابقة</td></tr>`}
   function unitAr(u){return {Piece:'قطعة',Kg:'كجم',Gram:'جرام',Box:'علبة',Pack:'باك'}[u]||u||'—'}
   function renderExpenses(){const q=$('expenseSearch')?.value?.trim().toLowerCase()||'';let rows=arr('expenses','Expenses');if(q)rows=rows.filter(x=>[val(x,'category','Category'),val(x,'reason','Reason'),val(x,'user','User')].join(' ').toLowerCase().includes(q));$('expenseCount').textContent=rows.length+' مصروف';$('expensesBody').innerHTML=rows.length?rows.map(x=>`<tr><td>${esc(val(x,'id','Id'))}</td><td class="yellow"><strong>${money(val(x,'amount','Amount'))}</strong></td><td>${esc(val(x,'category','Category')||'—')}</td><td>${esc(val(x,'reason','Reason')||'—')}</td><td>${esc(val(x,'user','User')||'—')}</td><td>${dt(val(x,'createdAt','CreatedAt'))}</td></tr>`).join(''):`<tr><td colspan="6" class="empty">لا توجد مصروفات</td></tr>`}
+  function snapshotCustomers(){
+    const rows=arr('customers','Customers');
+    return Array.isArray(rows)?rows:[];
+  }
+  function normalizedCustomer(x){
+    return {
+      name:val(x,'name','Name')||'—',
+      phone:val(x,'phone','Phone')||'—',
+      address:val(x,'address','Address','defaultAddress','DefaultAddress')||'—',
+      zone:val(x,'zone','Zone','deliveryZoneName','DeliveryZoneName')||'—',
+      orderCount:num(val(x,'order_count','orderCount','OrderCount')),
+      totalSpent:num(val(x,'total_spent','totalSpent','TotalSpent')),
+      lastOrderAt:val(x,'last_order_at','lastOrderAt','LastOrderAt')
+    };
+  }
+  async function loadCustomers(silent=false){
+    if(!currentRow?.store_id){customers=[];renderCustomers();return}
+    try{
+      const {data,error}=await sb.from('pos_customers')
+        .select('store_id,customer_id,name,phone,normalized_phone,address,zone,order_count,total_spent,last_order_at,updated_at')
+        .eq('store_id',currentRow.store_id)
+        .order('last_order_at',{ascending:false,nullsFirst:false});
+      if(error)throw error;
+      customers=(data||[]).map(normalizedCustomer);
+      $('customerStatus').textContent=customers.length?'تم تحميل قاعدة العملاء من المزامنة السحابية.':'لا يوجد عملاء مسجلون لهذا الفرع حتى الآن.';
+    }catch(e){
+      customers=snapshotCustomers().map(normalizedCustomer);
+      $('customerStatus').textContent=customers.length
+        ?'يتم عرض العملاء من آخر Snapshot. لتفعيل القائمة المستقلة نفّذ تحديث قاعدة بيانات Supabase الخاص بـ R4.'
+        :'جدول العملاء السحابي غير متاح بعد. نفّذ ملف supabase-schema.sql الخاص بـ R4 ثم أعد المزامنة.';
+      if(!silent && !customers.length) toast('جدول العملاء في Supabase يحتاج تحديث R4.','error');
+    }
+    renderCustomers();
+  }
+  function renderCustomers(){
+    const source=customers.length?customers:snapshotCustomers().map(normalizedCustomer);
+    const q=($('customerSearch')?.value||'').trim().toLowerCase();
+    const rows=q?source.filter(x=>[x.name,x.phone,x.address,x.zone].join(' ').toLowerCase().includes(q)):source;
+    if($('customerTotal'))$('customerTotal').textContent=source.length.toLocaleString('ar-EG');
+    if($('customerOrders'))$('customerOrders').textContent=source.reduce((a,x)=>a+num(x.orderCount),0).toLocaleString('ar-EG');
+    if($('customerSpent'))$('customerSpent').textContent=money(source.reduce((a,x)=>a+num(x.totalSpent),0));
+    if($('customerStore'))$('customerStore').textContent=currentRow?.store_id||'—';
+    if($('customerCount'))$('customerCount').textContent=rows.length.toLocaleString('ar-EG')+' عميل';
+    if(!$('customersBody'))return;
+    $('customersBody').innerHTML=rows.length?rows.map(x=>`<tr><td><strong>${esc(x.name)}</strong></td><td dir="ltr">${esc(x.phone)}</td><td>${esc(x.address)}</td><td>${esc(x.zone)}</td><td>${num(x.orderCount).toLocaleString('ar-EG')}</td><td class="green-t"><strong>${money(x.totalSpent)}</strong></td><td>${dt(x.lastOrderAt)}</td></tr>`).join(''):'<tr><td colspan="7" class="empty">لا توجد بيانات عملاء مطابقة</td></tr>';
+  }
+  async function exportCustomersExcel(){
+    const source=(customers.length?customers:snapshotCustomers().map(normalizedCustomer));
+    if(!source.length){toast('لا توجد بيانات عملاء لتصديرها','error');return}
+    if(typeof ExcelJS==='undefined'){toast('تعذر تحميل مكتبة Excel. تحقق من اتصال الإنترنت ثم أعد المحاولة.','error');return}
+    const wb=new ExcelJS.Workbook();wb.creator='Geek POS Online';wb.created=new Date();
+    const ws=wb.addWorksheet('العملاء');ws.views=[{rightToLeft:true,state:'frozen',ySplit:1}];
+    ws.addRow(['اسم العميل','رقم الموبايل','العنوان','المنطقة','عدد الطلبات','إجمالي التعامل','آخر طلب']);
+    const head=ws.getRow(1);head.font={bold:true,color:{argb:'FFFFFFFF'}};head.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF0A6B5C'}};head.alignment={horizontal:'center',vertical:'middle'};
+    for(const x of source)ws.addRow([x.name,x.phone,x.address,x.zone,num(x.orderCount),num(x.totalSpent),x.lastOrderAt?new Date(x.lastOrderAt):'']);
+    ws.getColumn(5).numFmt='#,##0';ws.getColumn(6).numFmt='#,##0.00';ws.getColumn(7).numFmt='dd/mm/yyyy hh:mm';
+    ws.columns=[{width:28},{width:20},{width:48},{width:24},{width:16},{width:20},{width:22}];
+    ws.eachRow((r,n)=>{r.alignment={vertical:'middle',horizontal:'right'};if(n>1&&n%2===0)r.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF5F7F6'}}});
+    const buffer=await wb.xlsx.writeBuffer();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download=`geek-pos-customers-${currentRow?.store_id||'all'}-${isoDate(new Date())}.xlsx`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
+  }
+
   function renderConnection(){$('cStore').textContent=currentRow?.store_id||'—';$('cVersion').textContent=currentRow?.app_version||'—';$('cDevice').textContent=currentRow?.device_name||'—';$('cUpdated').textContent=currentRow?dt(currentRow.updated_at):'—'}
   function changePage(name){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));$('page-'+name)?.classList.add('active');document.querySelector(`.nav button[data-page="${name}"]`)?.classList.add('active');$('pageTitle').textContent=pageMeta[name][0];$('pageSub').textContent=pageMeta[name][1];$('sidebar').classList.remove('open')}
   async function sendUpdate(type,payload){if(!currentRow?.store_id){toast('اختر فرعًا أولًا','error');return}const {error}=await sb.from('pos_updates').insert({store_id:currentRow.store_id,update_type:type,payload,status:'pending'});if(error)throw error;await loadUpdates(true)}
@@ -702,7 +791,7 @@ tbody tr:last-child td{border-bottom:0}
   setReportRange('today');
   $('loginBtn').onclick=signIn;$('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')signIn()});
   $('logoutBtn').onclick=async()=>{clearInterval(refreshTimer);await sb.auth.signOut();location.reload()};$('menuBtn').onclick=()=>$('sidebar').classList.toggle('open');$('refreshBtn').onclick=()=>loadSnapshots();$('storeSelect').onchange=()=>selectSnapshot(snapshots.find(x=>x.store_id===$('storeSelect').value));
-  $('shiftSearch').oninput=renderShifts;$('productSearch').oninput=renderProducts;$('categoryFilter').onchange=renderProducts;$('expenseSearch').oninput=renderExpenses;$('reloadUpdates').onclick=()=>loadUpdates();
+  $('shiftSearch').oninput=renderShifts;$('productSearch').oninput=renderProducts;$('categoryFilter').onchange=renderProducts;$('expenseSearch').oninput=renderExpenses;$('customerSearch').oninput=renderCustomers;$('exportCustomersExcel').onclick=exportCustomersExcel;$('reloadUpdates').onclick=()=>loadUpdates();
   $('addPaymentMethod').onclick=()=>{paymentDraft.push({key:'custom-'+Date.now(),name:'طريقة دفع جديدة',isActive:true,isBuiltIn:false});renderPaymentMethodsEditor(false)};$('savePaymentMethods').onclick=savePaymentMethodsOnline;
   $('loadReport').onclick=loadReport;$('exportReportExcel').onclick=exportReportExcel;$('clearReport').onclick=()=>{reportRows=[];renderReport();$('reportStatus').textContent='تم مسح التقرير الحالي.'};
   $('categoryForm').onsubmit=async e=>{e.preventDefault();try{await sendUpdate('category',{name:$('catName').value.trim(),sortOrder:Number($('catOrder').value||0),isActive:$('catActive').value==='true'});e.target.reset();$('catOrder').value=1;toast('تم إرسال تحديث القسم')}catch(err){toast('تعذر إرسال تحديث القسم حاليًا. حاول مرة أخرى.','error')}};
