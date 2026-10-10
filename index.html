@@ -1075,7 +1075,7 @@ tbody tr:last-child td{border-bottom:0}
 
   renderStoreOptions=function(){
     const prev=$('storeSelect').value||ALL;
-    const opts=[`<option value="${ALL}">ALL — كل الفروع</option>`]
+    const opts=[`<option value="${ALL}"> كل الفروع</option>`]
       .concat(snapshots.map(x=>`<option value="${esc(x.store_id)}">${esc(x.store_id)}</option>`));
     $('storeSelect').innerHTML=opts.join('');
     $('storeSelect').value=(prev===ALL||snapshots.some(x=>x.store_id===prev))?prev:ALL;
